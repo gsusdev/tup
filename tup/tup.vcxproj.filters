@@ -36,7 +36,7 @@
     <ClInclude Include="tup_body.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="tup_endianess.h">
+    <ClInclude Include="tup_endianness.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
@@ -48,6 +48,15 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="tup_body.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="tup_frame_sender.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="tup_endianness.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="tup_crc32.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

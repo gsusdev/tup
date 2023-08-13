@@ -111,7 +111,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
@@ -147,11 +147,14 @@
     <ClInclude Include="tup_header.h" />
     <ClInclude Include="tup_transfer.h" />
     <ClInclude Include="tup_types.h" />
-    <ClInclude Include="tup_endianess.h" />
+    <ClInclude Include="tup_endianness.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tup_body.c" />
+    <ClCompile Include="tup_crc32.c" />
+    <ClCompile Include="tup_endianness.c" />
     <ClCompile Include="tup_frame_receiver.c" />
+    <ClCompile Include="tup_frame_sender.c" />
     <ClCompile Include="tup_header.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

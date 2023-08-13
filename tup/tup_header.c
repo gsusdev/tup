@@ -2,60 +2,67 @@
 #include <assert.h>
 
 #include "tup_crc32.h"
+#include "tup_endianness.h"
 #include "tup_header.h"
 
-#define HEADER_SIZE 12
-
-static tup_crc32func_t crc32 = tup_crc32_calculate;
-
-size_t tup_header_getSize_bytes()
+tup_header_error_t tup_header_decode(const void* buf_p, size_t size_bytes, tup_header_t* header_out_p)
 {
-	return HEADER_SIZE;
+    assert(buf_p != NULL);
+    assert(header_out_p != NULL);
+    
+    if (size_bytes != TUP_HEADER_SIZE_BYTES)
+    {
+        return tup_header_error_invalidSize;
+    }
+
+    const uint32_t* ptr = (const uint32_t*)buf_p;
+
+    tup_header_t hdr;
+    memset(&hdr, 0, sizeof(hdr));
+
+    hdr.len = tup_endianness_fromBE32(*ptr++);
+    hdr.ver = tup_endianness_fromBE32(*ptr++);
+    hdr.crc32 = tup_endianness_fromBE32(*ptr++);
+
+    const size_t crcSize = sizeof(tup_checksum_t);
+
+    assert(size_bytes > crcSize);
+    const tup_checksum_t validCrc = tup_crc32_calculate(buf_p, size_bytes - crcSize);
+    if (validCrc != hdr.crc32)
+    {
+        return tup_header_error_invalidChecksum;
+    }
+
+    *header_out_p = hdr;
+
+    return tup_header_error_ok;
 }
 
-tup_header_error_t tup_header_decode(const uint8_t* buf_p, size_t size_bytes, tup_header_t* header_out_p)
+tup_header_error_t tup_header_encode(const tup_header_t* header_p, void* buf_out_p, size_t maxSize_bytes, size_t* actualSize_out_p)
 {
-	assert(buf_p != NULL);
-	assert(header_out_p != NULL);
-	
-	if (size_bytes != HEADER_SIZE)
-	{
-		return tup_header_error_invalidSize;
-	}
+    assert(header_p != NULL);
+    assert(buf_out_p != NULL);
+    assert(actualSize_out_p != NULL);
 
-	const uint32_t* ptr = (const uint32_t*)buf_p;
+    uint32_t* ptr = (uint32_t*)buf_out_p;
+    
+    if (maxSize_bytes >= TUP_HEADER_SIZE_BYTES)
+    {
+        *ptr++ = tup_endianness_toBE32(header_p->len);
+        *ptr++ = tup_endianness_toBE32(header_p->ver);
 
-	tup_header_t hdr;
-	memset(&hdr, 0, sizeof(hdr));
+        size_t size = (uintptr_t)ptr - (uintptr_t)buf_out_p;
+        tup_checksum_t crc = tup_crc32_calculate(buf_out_p, size);
 
-	hdr.len = tup_endianess_fromBE32(*ptr++);
-	hdr.ver = tup_endianess_fromBE32(*ptr++);
-	hdr.crc32 = tup_endianess_fromBE32(*ptr++);
+        *ptr++ = tup_endianness_toBE32(crc);
+        
+        assert(size == TUP_HEADER_SIZE_BYTES);
+        *actualSize_out_p = size;
+    }
+    else
+    {
+        *actualSize_out_p = 0;
+    }
 
-	const tup_checksum_t validCrc = crc32(buf_p, size_bytes);
-	if (validCrc != hdr.crc32)
-	{
-		return tup_header_error_invalidChecksum;
-	}
-
-	*header_out_p = hdr;
-
-	return tup_header_error_ok;
-}
-
-tup_header_error_t tup_header_encode(const tup_header_t* header_p, uint8_t* buf_out_p, size_t maxSize_bytes, size_t* actualSize_out_p)
-{
-
-}
-
-void tup_header_setCrc32Func(tup_crc32func_t crc32func_p)
-{
-	if (crc32func_p != NULL)
-	{
-		crc32 = crc32func_p;
-	}
-	else
-	{
-		crc32 = tup_crc32_calculate;
-	}
+    return tup_header_error_ok;
 }
