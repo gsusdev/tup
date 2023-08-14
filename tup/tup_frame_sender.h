@@ -26,7 +26,7 @@ typedef enum
 
 typedef struct
 {
-    const uint8_t privateData[28];
+    const uint8_t privateData[56];
 } tup_frameSender_descriptor_t;
 
 typedef struct

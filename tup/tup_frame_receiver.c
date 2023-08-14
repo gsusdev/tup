@@ -1,3 +1,6 @@
+// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include <assert.h>
 #include <string.h>
 
@@ -7,15 +10,15 @@
 
 typedef struct
 {
-    tup_frameReceiver_status_t status;
-    uint8_t* buffer_p;
+    volatile uint8_t* buffer_p;
+    volatile uint8_t* curPos_p;
     size_t bufferSize_bytes;
-    uint8_t* curPos_p;
     size_t expectedSize_bytes;	
-    bool isHeaderDecoded;	
     size_t fullBodySize_bytes;
     size_t fullFrameSize_bytes;
     tup_version_t version;
+    volatile tup_frameReceiver_status_t status;
+    bool isHeaderDecoded;
 } descriptor_t;
 
 static_assert(sizeof(descriptor_t) <= sizeof(tup_frameReceiver_descriptor_t), "Adjust the \"privateData\" field size in the \"tup_frameReceiver_descriptor_t\" struct");
@@ -34,7 +37,7 @@ static_assert(sizeof(descriptor_t) <= sizeof(tup_frameReceiver_descriptor_t), "A
 static bool checkDescr(const descriptor_t* descr_p);
 static size_t remainingBufSize(const descriptor_t* descr_p);
 static size_t usedBufSize(const descriptor_t* descr_p);
-static const void* bodyStart(const descriptor_t* descr_p);
+static const void volatile* bodyStart(const descriptor_t* descr_p);
 
 tup_frameReceiver_error_t tup_frameReceiver_init(
     tup_frameReceiver_descriptor_t* descriptor_p, 
@@ -68,7 +71,6 @@ tup_frameReceiver_error_t tup_frameReceiver_reset(tup_frameReceiver_descriptor_t
     DESCR(descriptor_p);
 
     descr_p->curPos_p = descr_p->buffer_p;
-    descr_p->expectedSize_bytes = 0;
     descr_p->status = tup_frameReceiver_status_idle;
     descr_p->isHeaderDecoded = false;
     descr_p->expectedSize_bytes = 0;
@@ -112,7 +114,7 @@ tup_frameReceiver_error_t tup_frameReceiver_getStatus(
 
 tup_frameReceiver_error_t tup_frameReceiver_getReceivedBody(
     const tup_frameReceiver_descriptor_t* descriptor_p,
-    const void** const body_out_p,
+    const void volatile** const body_out_p,
     size_t* fullBodySize_bytes_out_p,
     tup_version_t* protocolVersion_out_p)
 {
@@ -120,6 +122,11 @@ tup_frameReceiver_error_t tup_frameReceiver_getReceivedBody(
 
     assert(body_out_p != NULL);
     assert(fullBodySize_bytes_out_p != NULL);
+
+    if (descr_p->status != tup_frameReceiver_status_received)
+    {
+        return tup_frameReceiver_error_invalidOperation;
+    }
 
     *body_out_p = bodyStart(descr_p);
     *fullBodySize_bytes_out_p = descr_p->fullBodySize_bytes;
@@ -152,21 +159,21 @@ tup_frameReceiver_error_t tup_frameReceiver_getExpectedSize(
 
 tup_frameReceiver_error_t tup_frameReceiver_getDirectBuffer(
     const tup_frameReceiver_descriptor_t* descriptor_p,
-    void** const directBuf_out_pp,
+    volatile void** const directBuf_out_pp,
     size_t* maxSize_bytes_out_p)
     
 {
     CDESCR(descriptor_p);
 
     assert(directBuf_out_pp != NULL);
-    assert(maxSize_bytes_out_p != NULL);
-
-    const size_t maxSize = remainingBufSize(descr_p);
+    assert(maxSize_bytes_out_p != NULL);        
 
     if (descr_p->status != tup_frameReceiver_status_receiving)
     {
         return tup_frameReceiver_error_invalidOperation;
     }
+
+    const size_t maxSize = remainingBufSize(descr_p);
 
     *directBuf_out_pp = descr_p->curPos_p;
     *maxSize_bytes_out_p = maxSize;
@@ -174,7 +181,7 @@ tup_frameReceiver_error_t tup_frameReceiver_getDirectBuffer(
     return tup_frameReceiver_error_ok;
 }
 
-tup_frameReceiver_error_t tup_frameReceive_received(
+tup_frameReceiver_error_t tup_frameReceiver_received(
     tup_frameReceiver_descriptor_t* descriptor_p,
     const void* buf_p, 
     size_t size_bytes)
@@ -185,7 +192,7 @@ tup_frameReceiver_error_t tup_frameReceive_received(
     {
         return tup_frameReceiver_error_ok;
     }
-    else if (descr_p->status == tup_frameReceiver_status_receiving)
+    else if (descr_p->status != tup_frameReceiver_status_receiving)
     {
         return tup_frameReceiver_error_invalidOperation;
     }
@@ -199,11 +206,23 @@ tup_frameReceiver_error_t tup_frameReceive_received(
 
     if (buf_p != descr_p->curPos_p)
     {
-        memcpy(descr_p->curPos_p, buf_p, size_bytes);
+        memcpy((void*)descr_p->curPos_p, buf_p, size_bytes);
     }
 
     static_assert(sizeof(*descr_p->curPos_p) == sizeof(uint8_t), "Invalid pointer type");
     descr_p->curPos_p += size_bytes;
+
+    return tup_frameReceiver_error_ok;
+}
+
+tup_frameReceiver_error_t tup_frameReceiver_handle(tup_frameReceiver_descriptor_t* descriptor_p)
+{
+    DESCR(descriptor_p);
+
+    if (descr_p->status != tup_frameReceiver_status_receiving)
+    {
+        return tup_frameReceiver_error_ok;
+    }
 
     const size_t usedSize = usedBufSize(descr_p);
     const size_t headerSize = TUP_HEADER_SIZE_BYTES;
@@ -238,7 +257,7 @@ tup_frameReceiver_error_t tup_frameReceive_received(
                 }
 
                 descr_p->version = header.ver;
-                descr_p->fullBodySize_bytes = fullBodySize;				
+                descr_p->fullBodySize_bytes = fullBodySize;
                 descr_p->fullFrameSize_bytes = headerSize + fullBodySize;
                 descr_p->isHeaderDecoded = true;
             }
@@ -256,7 +275,7 @@ tup_frameReceiver_error_t tup_frameReceive_received(
 
     if (descr_p->isHeaderDecoded && (usedSize >= descr_p->fullFrameSize_bytes))
     {
-        const void* bodyStart_p = bodyStart(descr_p);
+        const void volatile* bodyStart_p = bodyStart(descr_p);
         const tup_body_error_t err = tup_body_check(descr_p->version, bodyStart_p, descr_p->fullBodySize_bytes);
 
         if (err == tup_body_error_ok)
@@ -297,10 +316,10 @@ static size_t usedBufSize(const descriptor_t* descr_p)
     return usedSize;
 }
 
-static const void* bodyStart(const descriptor_t* descr_p)
+static const void volatile* bodyStart(const descriptor_t* descr_p)
 {
     const size_t headerSize = TUP_HEADER_SIZE_BYTES;
-    const uint8_t* result_p = &descr_p->buffer_p[headerSize];
+    const uint8_t volatile* result_p = &descr_p->buffer_p[headerSize];
 
     return result_p;
 }

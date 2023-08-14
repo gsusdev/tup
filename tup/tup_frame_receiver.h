@@ -28,12 +28,12 @@ typedef enum
 
 typedef struct
 {
-    const uint8_t privateData[36];
+    const uint8_t privateData[72];
 } tup_frameReceiver_descriptor_t;
 
 typedef struct
 {
-    uint8_t* inputBuffer_p;
+    volatile void* inputBuffer_p;
     size_t bufferSize_bytes;	
 } tup_frameReceiver_initStruct_t;
 
@@ -60,10 +60,12 @@ tup_frameReceiver_error_t tup_frameReceiver_getExpectedSize(
 
 tup_frameReceiver_error_t tup_frameReceiver_getDirectBuffer(
     const tup_frameReceiver_descriptor_t* descriptor_p, 
-    void** const directBuf_out_pp, 
+    volatile void** const directBuf_out_pp, 
     size_t* maxSize_bytes_out_p);
 
-tup_frameReceiver_error_t tup_frameReceive_received(
+tup_frameReceiver_error_t tup_frameReceiver_received(
     tup_frameReceiver_descriptor_t* descriptor_p, 
     const void* buf_p, 
     size_t size_bytes);
+
+tup_frameReceiver_error_t tup_frameReceiver_handle(tup_frameReceiver_descriptor_t* descriptor_p);

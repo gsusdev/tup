@@ -1,5 +1,7 @@
-#include "tup_crc32.h"
+// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
+#include "tup_crc32.h"
 
 static const uint32_t crc32table[] = {
 	0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
@@ -41,10 +43,10 @@ static uint32_t getCRC32(uint32_t f_crc, uint8_t f_ata)
 	return (f_crc >> 8) ^ crc32table[(f_crc ^ f_ata) & 0xFF];
 }
 
-static tup_checksum_t crc32(const void* fp_ptr, size_t f_len)
+static tup_checksum_t crc32(const void volatile* fp_ptr, size_t f_len)
 {
 	uint32_t result = 0xFFFFFFFF;
-	uint8_t* pt = (uint8_t*)fp_ptr;
+	const uint8_t volatile* pt = (const uint8_t volatile*)fp_ptr;
 
 	while (f_len--)
 	{
@@ -56,7 +58,7 @@ static tup_checksum_t crc32(const void* fp_ptr, size_t f_len)
 
 static tup_crc32func_t handler = crc32;
 
-tup_checksum_t tup_crc32_calculate(const void* buf_p, size_t size_bytes)
+tup_checksum_t tup_crc32_calculate(const void volatile* buf_p, size_t size_bytes)
 {
 	return handler(buf_p, size_bytes);
 }

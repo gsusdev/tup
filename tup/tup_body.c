@@ -1,3 +1,6 @@
+// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include <assert.h>
 
 #include "tup_crc32.h"
@@ -48,7 +51,7 @@ tup_body_error_t tup_body_getSizeWoCrc_bytes(tup_version_t protocolVersion, size
     return tup_body_error_ok;
 }
 
-tup_body_error_t getCrcParams(tup_version_t protocolVersion, const void* buf_p, size_t fullSize_bytes, const tup_checksum_t** const checksum_out_pp, size_t* dataSize_out_p)
+tup_body_error_t getCrcParams(tup_version_t protocolVersion, const void volatile* buf_p, size_t fullSize_bytes, const tup_checksum_t** const checksum_out_pp, size_t* dataSize_out_p)
 {
     if (protocolVersion != currentProtocolVersion)
     {
@@ -69,7 +72,7 @@ tup_body_error_t getCrcParams(tup_version_t protocolVersion, const void* buf_p, 
     return tup_body_error_ok;
 }
 
-tup_body_error_t tup_body_check(tup_version_t protocolVersion, const void* buf_p, size_t fullSize_bytes)
+tup_body_error_t tup_body_check(tup_version_t protocolVersion, const void volatile* buf_p, size_t fullSize_bytes)
 {
     assert(buf_p != NULL);
 
@@ -92,7 +95,7 @@ tup_body_error_t tup_body_check(tup_version_t protocolVersion, const void* buf_p
     return tup_body_error_ok;
 }
 
-tup_body_error_t tup_body_sign(tup_version_t protocolVersion, void* buf_p, size_t fullSize_bytes)
+tup_body_error_t tup_body_sign(tup_version_t protocolVersion, void volatile* buf_p, size_t fullSize_bytes)
 {
     assert(buf_p != NULL);
 

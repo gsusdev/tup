@@ -1,3 +1,6 @@
+// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include <assert.h>
 
 #include "tup_frame_sender.h"
@@ -7,11 +10,11 @@
 
 typedef struct
 {
-    tup_frameSender_status_t status;    
-    size_t sendPos;
-    size_t fullBodySize_bytes;
+    uint8_t headerBuf[12];
+    volatile size_t sendPos;
     const void* sendingBody_p;
-    uint8_t headerBuf[TUP_HEADER_SIZE_BYTES];
+    size_t fullBodySize_bytes;
+    volatile tup_frameSender_status_t status;
 } descriptor_t;
 
 static_assert(sizeof(descriptor_t) <= sizeof(tup_frameSender_descriptor_t), "Adjust the \"privateData\" field size in the \"tup_frameSender_descriptor_t\" struct");
@@ -114,7 +117,7 @@ tup_frameSender_error_t tup_frameSender_getDataToSend(const tup_frameSender_desc
         return tup_frameSender_error_invalidOperation;
     }
 
-    const size_t* const sendPos_p = &descr_p->sendPos;
+    const size_t volatile* const sendPos_p = &descr_p->sendPos;
 
     if (*sendPos_p < TUP_HEADER_SIZE_BYTES)
     {
@@ -181,7 +184,14 @@ static tup_frameSender_error_t encodeHeader(descriptor_t* descr_p, tup_version_t
 
     tup_header_t header;
 
-    header.len = len;
+#if SIZE_MAX > UINT32_MAX 
+    if (len > UINT32_MAX)
+    {
+        return tup_frameSender_error_invalidSize;
+    }
+#endif
+    header.len = (uint32_t)len;
+
     header.ver = version;
 
     size_t headerSize;

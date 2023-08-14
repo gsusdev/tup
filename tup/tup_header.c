@@ -1,3 +1,6 @@
+// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include <string.h>
 #include <assert.h>
 
@@ -5,7 +8,7 @@
 #include "tup_endianness.h"
 #include "tup_header.h"
 
-tup_header_error_t tup_header_decode(const void* buf_p, size_t size_bytes, tup_header_t* header_out_p)
+tup_header_error_t tup_header_decode(const volatile void* buf_p, size_t size_bytes, tup_header_t* header_out_p)
 {
     assert(buf_p != NULL);
     assert(header_out_p != NULL);
@@ -25,8 +28,7 @@ tup_header_error_t tup_header_decode(const void* buf_p, size_t size_bytes, tup_h
     hdr.crc32 = tup_endianness_fromBE32(*ptr++);
 
     const size_t crcSize = sizeof(tup_checksum_t);
-
-    assert(size_bytes > crcSize);
+        
     const tup_checksum_t validCrc = tup_crc32_calculate(buf_p, size_bytes - crcSize);
     if (validCrc != hdr.crc32)
     {
