@@ -3,35 +3,39 @@
 
 #include "tup_endianness.h"
 
-static uint32_t func32(uint32_t value);
-static uint16_t func16(uint16_t value);
+bool tup_endianess_isBig()
+{
+    const unsigned int endianness_test = 1;
+    const bool result = ((*(const char*)&endianness_test) == 0u);
+
+    return result;
+}
 
 uint32_t tup_endianness_fromBE32(uint32_t value) //-V524
 {
-    return func32(value);
+    return tup_endianness_convert32(value, true);
 }
 
 uint16_t tup_endianness_fromBE16(uint16_t value) //-V524
 {
-    return func16(value);
+    return tup_endianness_convert16(value, true);
 }
 
 uint32_t tup_endianness_toBE32(uint32_t value) //-V524
 {
-    return func32(value);
+    return tup_endianness_convert32(value, true);
 }
 
 uint16_t tup_endianness_toBE16(uint16_t value) //-V524
 {
-    return func16(value);
+    return tup_endianness_convert16(value, true);
 }
 
-static const unsigned int endianness_test = 1;
-#define isBigEndian() ( (*(const char*)&endianness_test) == 0u )
 
-static uint32_t func32(uint32_t value)
+
+uint32_t tup_endianness_convert32(uint32_t value, bool isBig)
 {
-    if (isBigEndian())
+    if (isBig)
     {
         return value;
     }
@@ -46,9 +50,9 @@ static uint32_t func32(uint32_t value)
     return (b1 << 24u) | (b2 << 16u) | (b3 << 8u) + b4;
 }
 
-static uint16_t func16(uint16_t value)
+static uint16_t tup_endianness_convert16(uint16_t value, bool isBig)
 {
-    if (isBigEndian())
+    if (isBig)
     {
         return value;
     }

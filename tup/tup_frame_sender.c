@@ -17,7 +17,7 @@ typedef struct
     volatile tup_frameSender_status_t status;
 } descriptor_t;
 
-static_assert(sizeof(descriptor_t) <= sizeof(tup_frameSender_descriptor_t), "Adjust the \"privateData\" field size in the \"tup_frameSender_descriptor_t\" struct");
+static_assert(sizeof(descriptor_t) <= sizeof(tup_frameSender_t), "Adjust the \"privateData\" field size in the \"tup_frameSender_descriptor_t\" struct");
 
 #define _DESCR(d, qual)                                 \
     assert(d != NULL);                                  \
@@ -34,7 +34,7 @@ static bool checkDescr(const descriptor_t* descr_p);
 static bool maySend(const descriptor_t* descr_p);
 static tup_frameSender_error_t encodeHeader(descriptor_t* descr_p, tup_version_t version, size_t fullBodySize_bytes);
 
-tup_frameSender_error_t tup_frameSender_init(tup_frameSender_descriptor_t* descriptor_p, const tup_frameSender_initStruct_t* initStruct_p)
+tup_frameSender_error_t tup_frameSender_init(tup_frameSender_t* descriptor_p, const tup_frameSender_initStruct_t* initStruct_p)
 {
     assert(descriptor_p != NULL);
     assert(initStruct_p != NULL);
@@ -49,7 +49,7 @@ tup_frameSender_error_t tup_frameSender_init(tup_frameSender_descriptor_t* descr
     return tup_frameSender_error_ok;
 }
 
-tup_frameSender_error_t tup_frameSender_send(tup_frameSender_descriptor_t* descriptor_p, tup_version_t version, const void* body_p, size_t fullBodySize_bytes)
+tup_frameSender_error_t tup_frameSender_send(tup_frameSender_t* descriptor_p, tup_version_t version, const void* body_p, size_t fullBodySize_bytes)
 {
     DESCR(descriptor_p);
     assert(body_p != NULL);
@@ -73,7 +73,7 @@ tup_frameSender_error_t tup_frameSender_send(tup_frameSender_descriptor_t* descr
     return tup_frameSender_error_ok;
 }
 
-tup_frameSender_error_t tup_frameSender_signAndSend(tup_frameSender_descriptor_t* descriptor_p, tup_version_t version, void* body_p, size_t fullBodySize_bytes)
+tup_frameSender_error_t tup_frameSender_signAndSend(tup_frameSender_t* descriptor_p, tup_version_t version, void* body_p, size_t fullBodySize_bytes)
 {
     DESCR(descriptor_p);
 
@@ -92,7 +92,7 @@ tup_frameSender_error_t tup_frameSender_signAndSend(tup_frameSender_descriptor_t
     return sendError;
 }
 
-tup_frameSender_error_t tup_frameSender_getStatus(const tup_frameSender_descriptor_t* descriptor_p, tup_frameSender_status_t* status_out_p)
+tup_frameSender_error_t tup_frameSender_getStatus(const tup_frameSender_t* descriptor_p, tup_frameSender_status_t* status_out_p)
 {    
     CDESCR(descriptor_p);
     assert(status_out_p);
@@ -102,7 +102,7 @@ tup_frameSender_error_t tup_frameSender_getStatus(const tup_frameSender_descript
     return tup_frameSender_error_ok;
 }
 
-tup_frameSender_error_t tup_frameSender_getDataToSend(const tup_frameSender_descriptor_t* descriptor_p, const void** const buf_out_pp, size_t* size_bytes_out_p)
+tup_frameSender_error_t tup_frameSender_getDataToSend(const tup_frameSender_t* descriptor_p, const void** const buf_out_pp, size_t* size_bytes_out_p)
 {
     CDESCR(descriptor_p);
 
@@ -138,7 +138,7 @@ tup_frameSender_error_t tup_frameSender_getDataToSend(const tup_frameSender_desc
     return tup_frameSender_error_ok;
 }
 
-tup_frameSender_error_t tup_frameSender_sendPartialComplete(tup_frameSender_descriptor_t* descriptor_p, size_t actuallySent_bytes)
+tup_frameSender_error_t tup_frameSender_txCompleted(tup_frameSender_t* descriptor_p, size_t actuallySent_bytes)
 {
     DESCR(descriptor_p);
 

@@ -1,6 +1,7 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
+#include <assert.h>
 #include "tup_crc32.h"
 
 static const uint32_t crc32table[] = {
@@ -60,7 +61,23 @@ static tup_crc32func_t handler = crc32;
 
 tup_checksum_t tup_crc32_calculate(const void volatile* buf_p, size_t size_bytes)
 {
-	return handler(buf_p, size_bytes);
+	const tup_checksum_t result = handler(buf_p, size_bytes);
+	return result;
+}
+
+tup_checksum_t tup_crc32_calculateToEnd(const void volatile* begin_p, const void volatile* end_p)
+{
+	if (end_p == begin_p)
+	{
+		return 0;
+	}
+
+	assert(end_p > begin_p);
+
+	size_t size = (uintptr_t)end_p - (uintptr_t)begin_p;
+	const tup_checksum_t result = handler(begin_p, size);
+
+	return result;
 }
 
 bool tup_crc32_setHwHandler(tup_crc32func_t crc32func_p)

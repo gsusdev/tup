@@ -29,7 +29,7 @@ typedef enum
 typedef struct
 {
     const uint8_t privateData[72];
-} tup_frameReceiver_descriptor_t;
+} tup_frameReceiver_t;
 
 typedef struct
 {
@@ -38,34 +38,35 @@ typedef struct
 } tup_frameReceiver_initStruct_t;
 
 tup_frameReceiver_error_t tup_frameReceiver_init(
-    tup_frameReceiver_descriptor_t* descriptor_p, 
+    tup_frameReceiver_t* descriptor_p, 
     const tup_frameReceiver_initStruct_t* initStruct_p);
 
-tup_frameReceiver_error_t tup_frameReceiver_reset(tup_frameReceiver_descriptor_t* descriptor_p);
-tup_frameReceiver_error_t tup_frameReceiver_listen(tup_frameReceiver_descriptor_t* descriptor_p);
+tup_frameReceiver_error_t tup_frameReceiver_reset(tup_frameReceiver_t* descriptor_p);
+tup_frameReceiver_error_t tup_frameReceiver_listen(tup_frameReceiver_t* descriptor_p);
 
 tup_frameReceiver_error_t tup_frameReceiver_getStatus(
-    const tup_frameReceiver_descriptor_t* descriptor_p, 
+    const tup_frameReceiver_t* descriptor_p, 
     tup_frameReceiver_status_t* status_out_p);
 
 tup_frameReceiver_error_t tup_frameReceiver_getReceivedBody(
-    const tup_frameReceiver_descriptor_t* descriptor_p,
+    const tup_frameReceiver_t* descriptor_p,
     const void** const body_out_p,
     size_t* fullBodySize_bytes_out_p,
     tup_version_t* protocolVersion_out_p);
 
 tup_frameReceiver_error_t tup_frameReceiver_getExpectedSize(
-    const tup_frameReceiver_descriptor_t* descriptor_p, 
+    const tup_frameReceiver_t* descriptor_p, 
     size_t* expectedSize_bytes_out_p);
 
 tup_frameReceiver_error_t tup_frameReceiver_getDirectBuffer(
-    const tup_frameReceiver_descriptor_t* descriptor_p, 
+    const tup_frameReceiver_t* descriptor_p, 
     volatile void** const directBuf_out_pp, 
     size_t* maxSize_bytes_out_p);
 
 tup_frameReceiver_error_t tup_frameReceiver_received(
-    tup_frameReceiver_descriptor_t* descriptor_p, 
-    const void* buf_p, 
+    tup_frameReceiver_t* descriptor_p, 
+    const void volatile* buf_p, 
     size_t size_bytes);
 
-tup_frameReceiver_error_t tup_frameReceiver_handle(tup_frameReceiver_descriptor_t* descriptor_p);
+tup_frameReceiver_error_t tup_frameReceiver_handle(tup_frameReceiver_t* descriptor_p);
+tup_frameReceiver_error_t tup_frameReceiver_isHandlingNeeded(tup_frameReceiver_t* descriptor_p, bool* result_out_p);

@@ -40,31 +40,49 @@ tup_header_error_t tup_header_decode(const volatile void* buf_p, size_t size_byt
     return tup_header_error_ok;
 }
 
+tup_header_error_t tup_header_write(const tup_header_t* header_p, tup_bufWriter_t* writer_p)
+{
+    assert(header_p != NULL);
+    assert(writer_p != NULL);
+
+#if SIZE_MAX > UINT32_MAX
+    if (header_p->len > UINT32_MAX)
+    {
+        return tup_header_error_invalidSize;
+    }
+#endif
+
+    bool result = true;
+
+    const void* headerStart_p = tup_bufWriter_getPtr(writer_p);
+
+    result &= tup_bufWriter_writeU32(writer_p, (uint32_t)header_p->len);
+    result &= tup_bufWriter_writeU32(writer_p, (uint32_t)header_p->ver);
+    
+    const tup_checksum_t crc = tup_crc32_calculateToEnd(headerStart_p, tup_bufWriter_getPtr(writer_p));    
+    result &= tup_bufWriter_writeU32(writer_p, (uint32_t)crc);
+
+    if (!result)
+    {
+        return tup_header_error_invalidSize;
+    }
+
+    return tup_header_error_ok;
+}
+
 tup_header_error_t tup_header_encode(const tup_header_t* header_p, void* buf_out_p, size_t maxSize_bytes, size_t* actualSize_out_p)
 {
     assert(header_p != NULL);
     assert(buf_out_p != NULL);
     assert(actualSize_out_p != NULL);
 
-    uint32_t* ptr = (uint32_t*)buf_out_p;
-    
-    if (maxSize_bytes >= TUP_HEADER_SIZE_BYTES)
-    {
-        *ptr++ = tup_endianness_toBE32(header_p->len);
-        *ptr++ = tup_endianness_toBE32(header_p->ver);
+    tup_bufWriter_t bufWriter;
 
-        size_t size = (uintptr_t)ptr - (uintptr_t)buf_out_p;
-        tup_checksum_t crc = tup_crc32_calculate(buf_out_p, size);
+    tup_bufWriter_init(&bufWriter, buf_out_p, maxSize_bytes, true);
 
-        *ptr++ = tup_endianness_toBE32(crc);
-        
-        assert(size == TUP_HEADER_SIZE_BYTES);
-        *actualSize_out_p = size;
-    }
-    else
-    {
-        *actualSize_out_p = 0;
-    }
+    tup_header_write(header_p, &bufWriter);
+
+    *actualSize_out_p = tup_bufWriter_getSize(&bufWriter);
 
     return tup_header_error_ok;
 }

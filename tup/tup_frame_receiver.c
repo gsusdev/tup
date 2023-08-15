@@ -19,9 +19,10 @@ typedef struct
     tup_version_t version;
     volatile tup_frameReceiver_status_t status;
     bool isHeaderDecoded;
+    bool isHandlingNeeded;
 } descriptor_t;
 
-static_assert(sizeof(descriptor_t) <= sizeof(tup_frameReceiver_descriptor_t), "Adjust the \"privateData\" field size in the \"tup_frameReceiver_descriptor_t\" struct");
+static_assert(sizeof(descriptor_t) <= sizeof(tup_frameReceiver_t), "Adjust the \"privateData\" field size in the \"tup_frameReceiver_descriptor_t\" struct");
 
 #define _DESCR(d, qual)                                 \
     assert(d != NULL);                                  \
@@ -40,7 +41,7 @@ static size_t usedBufSize(const descriptor_t* descr_p);
 static const void volatile* bodyStart(const descriptor_t* descr_p);
 
 tup_frameReceiver_error_t tup_frameReceiver_init(
-    tup_frameReceiver_descriptor_t* descriptor_p, 
+    tup_frameReceiver_t* descriptor_p, 
     const tup_frameReceiver_initStruct_t* initStruct_p)
 {
     assert(descriptor_p != NULL);
@@ -66,13 +67,14 @@ tup_frameReceiver_error_t tup_frameReceiver_init(
     return tup_frameReceiver_error_ok;
 }
 
-tup_frameReceiver_error_t tup_frameReceiver_reset(tup_frameReceiver_descriptor_t* descriptor_p)
+tup_frameReceiver_error_t tup_frameReceiver_reset(tup_frameReceiver_t* descriptor_p)
 {
     DESCR(descriptor_p);
 
     descr_p->curPos_p = descr_p->buffer_p;
     descr_p->status = tup_frameReceiver_status_idle;
     descr_p->isHeaderDecoded = false;
+    descr_p->isHandlingNeeded = false;
     descr_p->expectedSize_bytes = 0;
     descr_p->fullBodySize_bytes = 0;
     descr_p->fullFrameSize_bytes = 0;
@@ -81,7 +83,7 @@ tup_frameReceiver_error_t tup_frameReceiver_reset(tup_frameReceiver_descriptor_t
     return tup_frameReceiver_error_ok;
 }
 
-tup_frameReceiver_error_t tup_frameReceiver_listen(tup_frameReceiver_descriptor_t* descriptor_p)
+tup_frameReceiver_error_t tup_frameReceiver_listen(tup_frameReceiver_t* descriptor_p)
 {
     DESCR(descriptor_p);
 
@@ -101,7 +103,7 @@ tup_frameReceiver_error_t tup_frameReceiver_listen(tup_frameReceiver_descriptor_
 }
 
 tup_frameReceiver_error_t tup_frameReceiver_getStatus(
-    const tup_frameReceiver_descriptor_t* descriptor_p, 
+    const tup_frameReceiver_t* descriptor_p, 
     tup_frameReceiver_status_t* status_out_p)
 {
     CDESCR(descriptor_p);	
@@ -113,7 +115,7 @@ tup_frameReceiver_error_t tup_frameReceiver_getStatus(
 }
 
 tup_frameReceiver_error_t tup_frameReceiver_getReceivedBody(
-    const tup_frameReceiver_descriptor_t* descriptor_p,
+    const tup_frameReceiver_t* descriptor_p,
     const void volatile** const body_out_p,
     size_t* fullBodySize_bytes_out_p,
     tup_version_t* protocolVersion_out_p)
@@ -140,7 +142,7 @@ tup_frameReceiver_error_t tup_frameReceiver_getReceivedBody(
 }
 
 tup_frameReceiver_error_t tup_frameReceiver_getExpectedSize(
-    const tup_frameReceiver_descriptor_t* descriptor_p,
+    const tup_frameReceiver_t* descriptor_p,
     size_t* expectedSize_bytes_out_p)
 {
     CDESCR(descriptor_p);
@@ -158,7 +160,7 @@ tup_frameReceiver_error_t tup_frameReceiver_getExpectedSize(
 }
 
 tup_frameReceiver_error_t tup_frameReceiver_getDirectBuffer(
-    const tup_frameReceiver_descriptor_t* descriptor_p,
+    const tup_frameReceiver_t* descriptor_p,
     volatile void** const directBuf_out_pp,
     size_t* maxSize_bytes_out_p)
     
@@ -181,9 +183,27 @@ tup_frameReceiver_error_t tup_frameReceiver_getDirectBuffer(
     return tup_frameReceiver_error_ok;
 }
 
+tup_frameReceiver_error_t tup_frameReceiver_isHandlingNeeded(
+    tup_frameReceiver_t* descriptor_p, bool* result_out_p)
+{
+    CDESCR(descriptor_p);
+    assert(result_out_p != NULL);
+
+    if (descr_p->status == tup_frameReceiver_status_receiving)
+    {
+        *result_out_p = descr_p->isHandlingNeeded;
+    }
+    else
+    {
+        *result_out_p = false;
+    }
+
+    return tup_frameReceiver_error_ok;
+}
+
 tup_frameReceiver_error_t tup_frameReceiver_received(
-    tup_frameReceiver_descriptor_t* descriptor_p,
-    const void* buf_p, 
+    tup_frameReceiver_t* descriptor_p,
+    const void volatile* buf_p, 
     size_t size_bytes)
 {
     DESCR(descriptor_p);
@@ -206,16 +226,22 @@ tup_frameReceiver_error_t tup_frameReceiver_received(
 
     if (buf_p != descr_p->curPos_p)
     {
-        memcpy((void*)descr_p->curPos_p, buf_p, size_bytes);
+        memcpy(descr_p->curPos_p, buf_p, size_bytes);
     }
 
     static_assert(sizeof(*descr_p->curPos_p) == sizeof(uint8_t), "Invalid pointer type");
     descr_p->curPos_p += size_bytes;
 
+    const size_t usedSize = usedBufSize(descr_p);
+    const size_t headerSize = TUP_HEADER_SIZE_BYTES;
+
+    descr_p->isHandlingNeeded |= !descr_p->isHeaderDecoded && (usedSize >= headerSize);
+    descr_p->isHandlingNeeded |= descr_p->isHeaderDecoded && (usedSize >= descr_p->fullFrameSize_bytes);
+    
     return tup_frameReceiver_error_ok;
 }
 
-tup_frameReceiver_error_t tup_frameReceiver_handle(tup_frameReceiver_descriptor_t* descriptor_p)
+tup_frameReceiver_error_t tup_frameReceiver_handle(tup_frameReceiver_t* descriptor_p)
 {
     DESCR(descriptor_p);
 
@@ -233,11 +259,12 @@ tup_frameReceiver_error_t tup_frameReceiver_handle(tup_frameReceiver_descriptor_
         {
             tup_header_t header;
             const tup_header_error_t hdrErr = tup_header_decode(descr_p->buffer_p, headerSize, &header);
+            descr_p->isHandlingNeeded = false;
 
             if (hdrErr == tup_header_error_ok)
             {
                 size_t fullBodySize;
-                const tup_body_error_t bodyErr = tup_body_getSizeWithCrc_bytes(descr_p->version, header.len, &fullBodySize);
+                const tup_body_error_t bodyErr = tup_body_getSizeWithCrc_bytes(header.ver, header.len, &fullBodySize);
 
                 if (bodyErr == tup_body_error_invalidProtocol)
                 {
@@ -277,6 +304,7 @@ tup_frameReceiver_error_t tup_frameReceiver_handle(tup_frameReceiver_descriptor_
     {
         const void volatile* bodyStart_p = bodyStart(descr_p);
         const tup_body_error_t err = tup_body_check(descr_p->version, bodyStart_p, descr_p->fullBodySize_bytes);
+        descr_p->isHandlingNeeded = false;
 
         if (err == tup_body_error_ok)
         {

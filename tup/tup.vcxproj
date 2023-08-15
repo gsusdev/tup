@@ -141,21 +141,29 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="tup_body.h" />
+    <ClInclude Include="tup_bufReader.h" />
+    <ClInclude Include="tup_bufWriter.h" />
     <ClInclude Include="tup_crc32.h" />
     <ClInclude Include="tup_frame_sender.h" />
     <ClInclude Include="tup_frame_receiver.h" />
     <ClInclude Include="tup_header.h" />
-    <ClInclude Include="tup_transfer.h" />
+    <ClInclude Include="tup_v1_transfer.h" />
     <ClInclude Include="tup_types.h" />
     <ClInclude Include="tup_endianness.h" />
+    <ClInclude Include="tup_v1_body.h" />
+    <ClInclude Include="tup_v1_types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tup_body.c" />
+    <ClCompile Include="tup_bufReader.c" />
+    <ClCompile Include="tup_bufWriter.c" />
     <ClCompile Include="tup_crc32.c" />
     <ClCompile Include="tup_endianness.c" />
     <ClCompile Include="tup_frame_receiver.c" />
     <ClCompile Include="tup_frame_sender.c" />
     <ClCompile Include="tup_header.c" />
+    <ClCompile Include="tup_v1_transfer.c" />
+    <ClCompile Include="tup_v1_body.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
