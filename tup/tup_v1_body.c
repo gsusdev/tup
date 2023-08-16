@@ -1,12 +1,13 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
+#include "tup_v1_body.h"
+
+#include <stddef.h>
 #include <assert.h>
 
 #include "tup_crc32.h"
-#include "tup_v1_body.h"
 #include "tup_endianness.h"
-
 #include "tup_bufWriter.h"
 #include "tup_bufReader.h"
 
@@ -68,6 +69,22 @@ tup_body_error_t tup_v1_body_check(const void volatile* buf_p, size_t fullSize_b
     return tup_body_error_ok;
 }
 
+tup_body_error_t tup_v1_body_getType(const void volatile* buf_p, size_t fullSize_bytes, tup_v1_cop_t* type_out_p)
+{
+    assert(type_out_p != NULL);
+
+    const size_t cop_offset = 5;
+    if (fullSize_bytes <= cop_offset)
+    {
+        return tup_body_error_invalidSize;
+    }
+
+    const tup_v1_cop_t* ptr = (const tup_v1_cop_t*)((uintptr_t)buf_p + cop_offset);
+    *type_out_p = *ptr;
+
+    return tup_body_error_ok;
+}
+
 tup_body_error_t tup_v1_body_sign(void volatile* buf_p, size_t fullSize_bytes)
 {
     assert(buf_p != NULL);
@@ -87,7 +104,7 @@ tup_body_error_t tup_v1_body_sign(void volatile* buf_p, size_t fullSize_bytes)
 }
 
 
-tup_body_error_t typ_v1_syn_encode(const tup_v1_syn_t* in_p, void* buf_out_p, size_t bufSize_bytes, size_t* actualSize_bytes_out_p)
+tup_body_error_t tup_v1_syn_encode(const tup_v1_syn_t* in_p, void* buf_out_p, size_t bufSize_bytes, size_t* actualSize_bytes_out_p)
 {
     assert(in_p != NULL);
     assert(buf_out_p != NULL);
@@ -125,7 +142,7 @@ tup_body_error_t typ_v1_syn_encode(const tup_v1_syn_t* in_p, void* buf_out_p, si
     return tup_body_error_ok;
 }
 
-tup_body_error_t typ_v1_syn_decode(const void volatile* buf_in_p, size_t bufSize_bytes, tup_v1_syn_t* out_p)
+tup_body_error_t tup_v1_syn_decode(const void volatile* buf_in_p, size_t bufSize_bytes, tup_v1_syn_t* out_p)
 {
     assert(buf_in_p != NULL);
     assert(out_p != NULL);
@@ -160,7 +177,7 @@ tup_body_error_t typ_v1_syn_decode(const void volatile* buf_in_p, size_t bufSize
     return tup_body_error_ok;
 }
 
-tup_body_error_t typ_v1_fin_encode(const tup_v1_fin_t* in_p, void* buf_out_p, size_t bufSize_bytes, size_t* actualSize_bytes_out_p)
+tup_body_error_t tup_v1_fin_encode(const tup_v1_fin_t* in_p, void* buf_out_p, size_t bufSize_bytes, size_t* actualSize_bytes_out_p)
 {
     assert(in_p != NULL);
     assert(buf_out_p != NULL);
@@ -190,7 +207,7 @@ tup_body_error_t typ_v1_fin_encode(const tup_v1_fin_t* in_p, void* buf_out_p, si
     return tup_body_error_ok;
 }
 
-tup_body_error_t typ_v1_fin_decode(const void volatile* buf_in_p, size_t bufSize_bytes, tup_v1_fin_t* out_p)
+tup_body_error_t tup_v1_fin_decode(const void volatile* buf_in_p, size_t bufSize_bytes, tup_v1_fin_t* out_p)
 {
     assert(buf_in_p != NULL);
     assert(out_p != NULL);
@@ -225,7 +242,7 @@ tup_body_error_t typ_v1_fin_decode(const void volatile* buf_in_p, size_t bufSize
 }
 
 
-tup_body_error_t typ_v1_ack_encode(const tup_v1_ack_t* in_p, void* buf_out_p, size_t bufSize_bytes, size_t* actualSize_bytes_out_p)
+tup_body_error_t tup_v1_ack_encode(const tup_v1_ack_t* in_p, void* buf_out_p, size_t bufSize_bytes, size_t* actualSize_bytes_out_p)
 {
     assert(in_p != NULL);
     assert(buf_out_p != NULL);
@@ -256,7 +273,7 @@ tup_body_error_t typ_v1_ack_encode(const tup_v1_ack_t* in_p, void* buf_out_p, si
     return tup_body_error_ok;
 }
 
-tup_body_error_t typ_v1_ack_decode(const void volatile* buf_in_p, size_t bufSize_bytes, tup_v1_ack_t* out_p)
+tup_body_error_t tup_v1_ack_decode(const void volatile* buf_in_p, size_t bufSize_bytes, tup_v1_ack_t* out_p)
 {
     assert(buf_in_p != NULL);
     assert(out_p != NULL);
@@ -291,7 +308,7 @@ tup_body_error_t typ_v1_ack_decode(const void volatile* buf_in_p, size_t bufSize
     return tup_body_error_ok;
 }
 
-tup_body_error_t typ_v1_data_encode(const tup_v1_data_t* in_p, void* buf_out_p, size_t bufSize_bytes, size_t* actualSize_bytes_out_p)
+tup_body_error_t tup_v1_data_encode(const tup_v1_data_t* in_p, void* buf_out_p, size_t bufSize_bytes, size_t* actualSize_bytes_out_p)
 {
     assert(in_p != NULL);
     assert(buf_out_p != NULL);
@@ -328,7 +345,7 @@ tup_body_error_t typ_v1_data_encode(const tup_v1_data_t* in_p, void* buf_out_p, 
     return tup_body_error_ok;
 }
 
-tup_body_error_t typ_v1_data_decode(const void volatile* buf_in_p, size_t bufSize_bytes, tup_v1_data_t* out_p)
+tup_body_error_t tup_v1_data_decode(const void volatile* buf_in_p, size_t bufSize_bytes, tup_v1_data_t* out_p)
 {
     assert(buf_in_p != NULL);
     assert(out_p != NULL);

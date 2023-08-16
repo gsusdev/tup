@@ -1,6 +1,8 @@
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef uint32_t tup_version_t;
 typedef uint32_t tup_checksum_t;

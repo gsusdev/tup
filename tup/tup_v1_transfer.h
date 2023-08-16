@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -34,9 +35,14 @@ typedef struct
     tup_transfer_onCompleted_t onCompleted;
     tup_transfer_onFail_t onFail;
     tup_transfer_onReceived_t onReceived;
+    uintptr_t userCallbackValue;
     tup_txHandler_t txHandler;
     uintptr_t txCallbackValue;
 } tup_transfer_initStruct_t;
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 tup_transfer_error_t tup_transfer_init(tup_transfer_t* descriptor_p, const tup_transfer_initStruct_t* init_p);
 
@@ -58,4 +64,6 @@ void tup_transfer_rxError(tup_transfer_t* descriptor_p);
 
 void tup_transfer_transmitted(tup_transfer_t* descriptor_p, size_t size_bytes);
 
-
+#if defined(__cplusplus)
+} // extern "C"
+#endif

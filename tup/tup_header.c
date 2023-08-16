@@ -1,12 +1,13 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
+#include "tup_header.h"
+
 #include <string.h>
 #include <assert.h>
 
 #include "tup_crc32.h"
 #include "tup_endianness.h"
-#include "tup_header.h"
 
 tup_header_error_t tup_header_decode(const volatile void* buf_p, size_t size_bytes, tup_header_t* header_out_p)
 {

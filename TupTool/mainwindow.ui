@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>965</width>
+    <height>647</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>251</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Serial port</string>
+    </property>
+    <widget class="QPushButton" name="butRefresh">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>20</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Refresh</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="butOpenClose">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>50</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Open</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cbPortName">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>151</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="editable">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cbBaudrate">
+     <property name="geometry">
+      <rect>
+       <x>68</x>
+       <y>50</y>
+       <width>91</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>14</x>
+       <y>54</y>
+       <width>47</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Baudrate</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>100</y>
+      <width>461</width>
+      <height>491</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <layout class="QGridLayout" name="gridLayout_5">
+     <item row="0" column="0">
+      <widget class="QGroupBox" name="gbSendSyn">
+       <property name="title">
+        <string>Send SYN</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QFrame" name="frSendSyn">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout"/>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frame">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="butSendSyn">
+             <property name="text">
+              <string>Send</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QGroupBox" name="gbSendFin">
+       <property name="title">
+        <string>Send FIN</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QFrame" name="frSendFin">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_2"/>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frame_2">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="butSendFin">
+             <property name="text">
+              <string>Send</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QGroupBox" name="gbSendAck">
+       <property name="title">
+        <string>Send ACK</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QFrame" name="frSendAck">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_4"/>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frame_3">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="butSendAck">
+             <property name="text">
+              <string>Send</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QGroupBox" name="gbSendData">
+       <property name="title">
+        <string>Send DATA</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QFrame" name="frSendData">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_3"/>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frame_4">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="butSendData">
+             <property name="text">
+              <string>Send</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_3">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>100</y>
+      <width>461</width>
+      <height>491</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <layout class="QGridLayout" name="gridLayout_6">
+     <item row="0" column="0">
+      <widget class="QGroupBox" name="gbRecvSyn">
+       <property name="title">
+        <string>Recv SYN</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QFrame" name="frRecvSyn">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_7"/>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QGroupBox" name="gbRecvFin">
+       <property name="title">
+        <string>Recv FIN</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="QFrame" name="frRecvFin">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_8"/>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QGroupBox" name="gbRecvAck">
+       <property name="title">
+        <string>Recv ACK</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <item>
+         <widget class="QFrame" name="frRecvAck">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_9"/>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QGroupBox" name="gbRecvData">
+       <property name="title">
+        <string>Recv DATA</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_8">
+        <item>
+         <widget class="QFrame" name="frRecvData">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_10"/>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>965</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

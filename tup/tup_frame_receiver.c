@@ -1,10 +1,11 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
+#include "tup_frame_receiver.h"
+
 #include <assert.h>
 #include <string.h>
 
-#include "tup_frame_receiver.h"
 #include "tup_header.h"
 #include "tup_body.h"
 
@@ -322,6 +323,7 @@ tup_frameReceiver_error_t tup_frameReceiver_handle(tup_frameReceiver_t* descript
 
 static bool checkDescr(const descriptor_t* descr_p)
 {
+    (void)descr_p;
     //TODO: implement some descriptor checking logic
     return true;
 }

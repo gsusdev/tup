@@ -1,13 +1,12 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
+#include "tup_body.h"
+
 #include <assert.h>
 
 #include "tup_crc32.h"
-#include "tup_body.h"
 #include "tup_v1_body.h"
-
-static const tup_version_t currentProtocolVersion = 1;
 
 tup_body_error_t tup_body_getSizeWithCrc_bytes(tup_version_t protocolVersion, size_t bodyWoCrcSize_bytes, size_t* fullSize_out_p)
 {

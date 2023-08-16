@@ -28,7 +28,7 @@ typedef enum
 
 typedef struct
 {
-    const uint8_t privateData[72];
+    uint8_t privateData[72];
 } tup_frameReceiver_t;
 
 typedef struct
@@ -36,6 +36,10 @@ typedef struct
     volatile void* inputBuffer_p;
     size_t bufferSize_bytes;	
 } tup_frameReceiver_initStruct_t;
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 tup_frameReceiver_error_t tup_frameReceiver_init(
     tup_frameReceiver_t* descriptor_p, 
@@ -50,7 +54,7 @@ tup_frameReceiver_error_t tup_frameReceiver_getStatus(
 
 tup_frameReceiver_error_t tup_frameReceiver_getReceivedBody(
     const tup_frameReceiver_t* descriptor_p,
-    const void** const body_out_p,
+    const void volatile** const body_out_p,
     size_t* fullBodySize_bytes_out_p,
     tup_version_t* protocolVersion_out_p);
 
@@ -70,3 +74,7 @@ tup_frameReceiver_error_t tup_frameReceiver_received(
 
 tup_frameReceiver_error_t tup_frameReceiver_handle(tup_frameReceiver_t* descriptor_p);
 tup_frameReceiver_error_t tup_frameReceiver_isHandlingNeeded(tup_frameReceiver_t* descriptor_p, bool* result_out_p);
+
+#if defined(__cplusplus)
+} // extern "C"
+#endif
