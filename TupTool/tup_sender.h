@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QIODevice>
 #include <QByteArray>
+#include <QDebug>
 
 #include "tup_frame_sender.h"
 #include "tup_v1_body.h"
@@ -39,11 +40,13 @@ private:
     {
         if (_port_p == NULL)
         {
+            qDebug() << "Port is null";
             return false;
         }
 
         if (!_port_p->isOpen() || !_port_p->isWritable())
         {
+            qDebug() << "Port is closed or readonly";
             return false;
         }
 
@@ -51,12 +54,14 @@ private:
         const auto encodeResult = encoder(inputFrame_p, _buf.data(), _buf.size(), &size);
         if (encodeResult != tup_body_error_ok)
         {
+            qDebug() << "xxx_encode error " << encodeResult;
             return false;
         }
 
         const auto sendResult = tup_frameSender_send(&frameSender, TUP_VERSION_1, _buf.data(), size);
         if (sendResult != tup_frameSender_error_ok)
         {
+            qDebug() << "frameSender_send error " << sendResult;
             return false;
         }
 

@@ -64,13 +64,17 @@ void TupSender::portAboutToClose()
 
 void TupSender::portBytesWritten(qint64 bytes)
 {
-    auto res = tup_frameSender_txCompleted(&frameSender, bytes);
+    bool isFinished;
+    auto res = tup_frameSender_txCompleted(&frameSender, bytes, &isFinished);
     if (res != tup_frameSender_error_ok)
     {
         return;
     }
 
-    fetchAndSend();
+    if (!isFinished)
+    {
+        fetchAndSend();
+    }
 }
 
 bool TupSender::fetchAndSend()
@@ -80,12 +84,14 @@ bool TupSender::fetchAndSend()
     const auto getDataResult = tup_frameSender_getDataToSend(&frameSender, &dataToSend_p, &sizeToSend);
     if (getDataResult != tup_frameSender_error_ok)
     {
+        qDebug() << "frameSender_getDataToSend error " << getDataResult;
         return false;
     }
 
     const auto writtenSize = _port_p->write(static_cast<const char*>(dataToSend_p), sizeToSend);
     if (writtenSize == -1)
     {
+        qDebug() << "Port error " << _port_p->errorString();
         return false;
     }
 

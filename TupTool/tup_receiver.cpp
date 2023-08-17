@@ -1,6 +1,7 @@
 #include "tup_receiver.h"
 
 #include <QMetaObject>
+#include <QDebug>
 
 #include "tup_v1_body.h"
 
@@ -8,7 +9,25 @@ TupReceiver::TupReceiver(QObject* parent)
 {
     (void)parent;
 
+    _buf.resize(1024);
+
     reset();
+}
+
+void TupReceiver::setPort(QIODevice* port_p)
+{
+    if (_port_p != nullptr)
+    {
+        disconnect(_port_p, &QObject::destroyed, this, &TupReceiver::portDestroyed);
+        disconnect(_port_p, &QIODevice::readyRead, this, &TupReceiver::portReadyRead);
+        disconnect(_port_p, &QIODevice::aboutToClose, this, &TupReceiver::portAboutToClose);
+    }
+
+    _port_p = port_p;
+
+    connect(_port_p, &QObject::destroyed, this, &TupReceiver::portDestroyed);
+    connect(_port_p, &QIODevice::readyRead, this, &TupReceiver::portReadyRead);
+    connect(_port_p, &QIODevice::aboutToClose, this, &TupReceiver::portAboutToClose);
 }
 
 void TupReceiver::portDestroyed(QObject* obj)
@@ -30,6 +49,7 @@ void TupReceiver::portReadyRead()
     auto err = tup_frameReceiver_received(&frameReceiver, receivedData.data(), receivedData.size());
     if (err != tup_frameReceiver_error_ok)
     {
+        qDebug() << "frameReceiver_received error " << err;
         return;
     }
 
@@ -37,6 +57,7 @@ void TupReceiver::portReadyRead()
     err = tup_frameReceiver_isHandlingNeeded(&frameReceiver, &isHandlingNeeded);
     if (err != tup_frameReceiver_error_ok)
     {
+        qDebug() << "frameReceiver_isHandlingNeeded error " << err;
         return;
     }
 
@@ -51,11 +72,17 @@ void TupReceiver::receiverHandlingNeeded()
     auto err = tup_frameReceiver_handle(&frameReceiver);
     if (err != tup_frameReceiver_error_ok)
     {
+        qDebug() << "frameReceiver_handle error " << err;
         return;
     }
 
     tup_frameReceiver_status_t status;
     err = tup_frameReceiver_getStatus(&frameReceiver, &status);
+    if (err != tup_frameReceiver_error_ok)
+    {
+        qDebug() << "frameReceiver_getStatus error " << err;
+        return;
+    }
 
     switch (status)
     {
@@ -79,8 +106,24 @@ void TupReceiver::receiverHandlingNeeded()
 void TupReceiver::reset()
 {
     tup_frameReceiver_initStruct_t init;
-    tup_frameReceiver_init(&frameReceiver, &init);
+
+    init.inputBuffer_p = _buf.data();
+    init.bufferSize_bytes = _buf.size();
+
+    auto err = tup_frameReceiver_init(&frameReceiver, &init);
+    if (err != tup_frameReceiver_error_ok)
+    {
+        qDebug() << "frameReceiver_init error " << err;
+        return;
+    }
+
+    err = tup_frameReceiver_listen(&frameReceiver);
+    if (err != tup_frameReceiver_error_ok)
+    {
+        qDebug() << "frameReceiver_listen error " << err;
+    }
 }
+
 
 void TupReceiver::frameReceived()
 {
@@ -91,6 +134,7 @@ void TupReceiver::frameReceived()
     auto errRecv = tup_frameReceiver_getReceivedBody(&frameReceiver, &body_p, &size, &version);
     if (errRecv != tup_frameReceiver_error_ok)
     {
+        qDebug() << "frameReceiver_getReceivedBody error " << errRecv;
         return;
     }
 
@@ -98,6 +142,7 @@ void TupReceiver::frameReceived()
     auto errBody = tup_v1_body_getType(body_p, size, &type);
     if (errBody != tup_body_error_ok)
     {
+        qDebug() << "body_getType error " << errBody;
         return;
     }
 
@@ -128,6 +173,7 @@ void TupReceiver::decodeSyn(const volatile void* buf_p, size_t size)
     const auto err = tup_v1_syn_decode(buf_p, size, frame_p.data());
     if (err != tup_body_error_ok)
     {
+        qDebug() << "syn_decode error " << err;
         return;
     }
 
@@ -141,6 +187,7 @@ void TupReceiver::decodeFin(const volatile void* buf_p, size_t size)
     const auto err = tup_v1_fin_decode(buf_p, size, frame_p.data());
     if (err != tup_body_error_ok)
     {
+        qDebug() << "fin_decode error " << err;
         return;
     }
 
@@ -154,6 +201,7 @@ void TupReceiver::decodeAck(const volatile void* buf_p, size_t size)
     const auto err = tup_v1_ack_decode(buf_p, size, frame_p.data());
     if (err != tup_body_error_ok)
     {
+        qDebug() << "ack_decode error " << err;
         return;
     }
 
@@ -166,6 +214,7 @@ void TupReceiver::decodeData(const volatile void* buf_p, size_t size)
     const auto err = tup_v1_data_decode(buf_p, size, &receivedDataFrame);
     if (err != tup_body_error_ok)
     {
+        qDebug() << "data_decode error " << err;
         return;
     }
 
@@ -186,6 +235,6 @@ DataFrame::DataFrame(const tup_v1_data_t& src)
 
     for (size_t i = 0; i < src.payloadSize_bytes; ++i)
     {
-        *dst_p = *src_p;
+        *dst_p++ = *src_p++;
     }
 }

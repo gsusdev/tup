@@ -11,30 +11,37 @@ typedef enum
       tup_transfer_error_ok
     , tup_transfer_error_busy
     , tup_transfer_error_internal
+    , tup_transfer_error_invalidInit
+    , tup_transfer_error_invalidDescr    
     , tup_transfer_error_noReceivedData
     , tup_transfer_error_noActiveTransfer	
 } tup_transfer_error_t;
 
 typedef void (*tup_transfer_onCompleted_t)(tup_transfer_result_t resultCode, uintptr_t tag);
+typedef void (*tup_transfer_onSyn_t)(size_t windowSize, uintptr_t tag);
+typedef void (*tup_transfer_onFin_t)(uintptr_t tag);
+typedef void (*tup_transfer_onData_t)(const void volatile* payload_p, size_t payloadSize_bytes, uintptr_t tag);
 typedef void (*tup_transfer_onFail_t)(tup_transfer_fail_t failCode, uintptr_t tag);
-typedef void (*tup_transfer_onReceived_t)(const void volatile* payload_p, size_t payloadSize_bytes, uintptr_t tag);
 
 typedef void (*tup_txHandler_t)(const void* buf_p, size_t size_bytes, uintptr_t callbackValue);
 
 typedef struct
 {
-
+    uint8_t privateData[206];
 } tup_transfer_t;
 
 typedef struct
 {	
-    uint8_t* inputBuffer_p;
-    size_t inputBufferSize_bytes;	
-    uint32_t ackTimeout_ms;
+    uint8_t* workBuffer_p;
+    size_t workBufferSize_bytes;	
+    uint32_t synTimeout_ms;
+    uint32_t dataTimeout_ms;
     uint32_t retryCount;
+    tup_transfer_onSyn_t onSyn;
+    tup_transfer_onFin_t onFin;
+    tup_transfer_onData_t onData;
     tup_transfer_onCompleted_t onCompleted;
     tup_transfer_onFail_t onFail;
-    tup_transfer_onReceived_t onReceived;
     uintptr_t userCallbackValue;
     tup_txHandler_t txHandler;
     uintptr_t txCallbackValue;
@@ -46,7 +53,7 @@ extern "C" {
 
 tup_transfer_error_t tup_transfer_init(tup_transfer_t* descriptor_p, const tup_transfer_initStruct_t* init_p);
 
-tup_transfer_error_t tup_transfer_sendSyn(tup_transfer_t* descriptor_p, uint32_t j, size_t windowSize);
+tup_transfer_error_t tup_transfer_sendSyn(tup_transfer_t* descriptor_p, uint32_t j);
 tup_transfer_error_t tup_transfer_sendFin(tup_transfer_t* descriptor_p);
 tup_transfer_error_t tup_transfer_sendData(tup_transfer_t* descriptor_p, const void* payload_p, size_t payloadSize_bytes, bool isFinal);
 

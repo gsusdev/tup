@@ -182,7 +182,7 @@ uint8_t tup_bufReader_readU8(tup_bufReader_t* descriptor_p, bool* okFlag_p)
     }
 
     const uint8_t* val_p = (const uint8_t*)descr_p->cur_p;
-    result = tup_endianness_convert32(*val_p, descr_p->isBigEndian);
+    result = *val_p;
 
     advance(descr_p, readSize);
 

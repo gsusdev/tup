@@ -45,5 +45,6 @@ private:
     void decodeData(const void volatile* buf_p, size_t size);
 
     QIODevice* _port_p = nullptr;
+    QByteArray _buf;
     tup_frameReceiver_t frameReceiver;
 };

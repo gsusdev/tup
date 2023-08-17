@@ -2,5 +2,7 @@
 
 #include <QComboBox>
 
-void initCopList(QComboBox& comboBox);
+#include "tup_v1_body.h"
+
+void initCopList(QComboBox& comboBox, tup_v1_cop_t preSelect);
 void initErrorList(QComboBox& comboBox);

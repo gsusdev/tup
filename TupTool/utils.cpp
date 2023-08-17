@@ -2,7 +2,7 @@
 
 #include "tup_v1_body.h"
 
-void initCopList(QComboBox& comboBox)
+void initCopList(QComboBox& comboBox, tup_v1_cop_t preSelect)
 {
     comboBox.clear();
 
@@ -10,6 +10,8 @@ void initCopList(QComboBox& comboBox)
     comboBox.addItem("ACK", tup_v1_cop_ack);
     comboBox.addItem("DATA", tup_v1_cop_data);
     comboBox.addItem("FIN", tup_v1_cop_fin);
+
+    comboBox.setCurrentIndex(comboBox.findData(preSelect));
 }
 
 void initErrorList(QComboBox& comboBox)

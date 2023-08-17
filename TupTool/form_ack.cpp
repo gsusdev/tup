@@ -9,7 +9,7 @@ AckForm::AckForm(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    initCopList(*ui->cbCop);
+    initCopList(*ui->cbCop, tup_v1_cop_ack);
     initErrorList(*ui->cbError);
 }
 
@@ -22,7 +22,7 @@ PAckFrame AckForm::getFrame() const
 {
     auto ptr = PAckFrame(new tup_v1_ack_t());
 
-    ptr->j = ui->sbJ->value();
+    ptr->j = ui->leJ->text().toULong(nullptr, 0);
     ptr->cop = static_cast<tup_v1_cop_t>(ui->cbCop->currentData().toUInt());
     ptr->error = static_cast<tup_transfer_result_t>(ui->cbError->currentData().toUInt());
 
@@ -31,7 +31,7 @@ PAckFrame AckForm::getFrame() const
 
 void AckForm::setFrame(PAckFrame value_p)
 {
-    ui->sbJ->setValue(value_p->j);
+    ui->leJ->setText(QString::number(value_p->j));
     ui->cbCop->setCurrentIndex(ui->cbCop->findData(value_p->cop));
     ui->cbError->setCurrentIndex(ui->cbError->findData(value_p->error));
 }

@@ -28,6 +28,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void logText(QString text);
+
 private slots:
     void butRefreshClicked(bool checked);
     void butOpenCloseClicked(bool checked);

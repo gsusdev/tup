@@ -41,11 +41,19 @@ MainWindow::MainWindow(QWidget *parent)
 
     initPortList(*ui->cbPortName);
     initBaudratesList(*ui->cbBaudrate);
+
+    _sender.setPort(&_port);
+    _receiver.setPort(&_port);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::logText(QString text)
+{
+    ui->pteLog->appendPlainText(text);
 }
 
 void MainWindow::butRefreshClicked(bool checked)
@@ -74,11 +82,11 @@ void MainWindow::butOpenCloseClicked(bool checked)
 
         if (_port.open(QSerialPort::ReadWrite))
         {
-            ui->butOpenClose->setText("Open");
+            ui->butOpenClose->setText("Close");
         }
         else
         {
-            const auto errText = QMetaEnum::fromType<QSerialPort::SerialPortError>().valueToKey(_port.error());
+            const auto errText = _port.errorString();// QMetaEnum::fromType<QSerialPort::SerialPortError>().valueToKey(_port.error());
             QMessageBox::critical(this, "Open port", errText);
         }
     }

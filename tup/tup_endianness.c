@@ -33,7 +33,7 @@ uint16_t tup_endianness_toBE16(uint16_t value) //-V524
 
 uint32_t tup_endianness_convert32(uint32_t value, bool isBig)
 {
-    if (isBig)
+    if (isBig == tup_endianess_isBig())
     {
         return value;
     }
@@ -50,7 +50,7 @@ uint32_t tup_endianness_convert32(uint32_t value, bool isBig)
 
 uint16_t tup_endianness_convert16(uint16_t value, bool isBig)
 {
-    if (isBig)
+    if (isBig == tup_endianess_isBig())
     {
         return value;
     }

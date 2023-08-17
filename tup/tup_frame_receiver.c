@@ -5,6 +5,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <stdatomic.h>
 
 #include "tup_header.h"
 #include "tup_body.h"
@@ -12,18 +13,18 @@
 typedef struct
 {
     volatile uint8_t* buffer_p;
-    volatile uint8_t* curPos_p;
+    volatile uint8_t* _Atomic curPos_p;
     size_t bufferSize_bytes;
     size_t expectedSize_bytes;	
     size_t fullBodySize_bytes;
     size_t fullFrameSize_bytes;
     tup_version_t version;
-    volatile tup_frameReceiver_status_t status;
+    volatile _Atomic tup_frameReceiver_status_t status;
     bool isHeaderDecoded;
     bool isHandlingNeeded;
 } descriptor_t;
 
-static_assert(sizeof(descriptor_t) <= sizeof(tup_frameReceiver_t), "Adjust the \"privateData\" field size in the \"tup_frameReceiver_descriptor_t\" struct");
+static_assert(sizeof(descriptor_t) <= sizeof(tup_frameReceiver_t), "Adjust the \"privateData\" field size in the \"tup_frameReceiver_t\" struct");
 
 #define _DESCR(d, qual)                                 \
     assert(d != NULL);                                  \
@@ -53,7 +54,7 @@ tup_frameReceiver_error_t tup_frameReceiver_init(
     bool initOk = true;
 
     initOk &= initStruct_p->inputBuffer_p != NULL;
-    initOk &= initStruct_p->bufferSize_bytes < TUP_HEADER_SIZE_BYTES;
+    initOk &= initStruct_p->bufferSize_bytes >= TUP_HEADER_SIZE_BYTES;
 
     if (!initOk)
     {
@@ -72,8 +73,8 @@ tup_frameReceiver_error_t tup_frameReceiver_reset(tup_frameReceiver_t* descripto
 {
     DESCR(descriptor_p);
 
-    descr_p->curPos_p = descr_p->buffer_p;
     descr_p->status = tup_frameReceiver_status_idle;
+    descr_p->curPos_p = descr_p->buffer_p;
     descr_p->isHeaderDecoded = false;
     descr_p->isHandlingNeeded = false;
     descr_p->expectedSize_bytes = 0;
@@ -88,16 +89,20 @@ tup_frameReceiver_error_t tup_frameReceiver_listen(tup_frameReceiver_t* descript
 {
     DESCR(descriptor_p);
 
-    if (descr_p->status == tup_frameReceiver_status_received)
+    tup_frameReceiver_status_t status = tup_frameReceiver_status_received;
+    bool mayListen = atomic_compare_exchange_strong(&descr_p->status, &status, tup_frameReceiver_status_receiving);
+
+    if (!mayListen)
     {
-        (void)tup_frameReceiver_reset(descriptor_p);
+        status = tup_frameReceiver_status_idle;
+        mayListen = atomic_compare_exchange_strong(&descr_p->status, &status, tup_frameReceiver_status_receiving);
     }
-    else if (descr_p->status != tup_frameReceiver_status_idle)
+
+    if (!mayListen)
     {
         return tup_frameReceiver_error_invalidOperation;
     }
-        
-    descr_p->status = tup_frameReceiver_status_receiving;
+
     descr_p->expectedSize_bytes = TUP_HEADER_SIZE_BYTES;
 
     return tup_frameReceiver_error_ok;
@@ -231,7 +236,7 @@ tup_frameReceiver_error_t tup_frameReceiver_received(
     }
 
     static_assert(sizeof(*descr_p->curPos_p) == sizeof(uint8_t), "Invalid pointer type");
-    descr_p->curPos_p += size_bytes;
+    atomic_fetch_add(&descr_p->curPos_p, size_bytes);
 
     const size_t usedSize = usedBufSize(descr_p);
     const size_t headerSize = TUP_HEADER_SIZE_BYTES;

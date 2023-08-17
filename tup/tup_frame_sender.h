@@ -44,7 +44,7 @@ tup_frameSender_error_t tup_frameSender_signAndSend(tup_frameSender_t* descripto
 tup_frameSender_error_t tup_frameSender_getStatus(const tup_frameSender_t* descriptor_p, tup_frameSender_status_t* status_out_p);
 
 tup_frameSender_error_t tup_frameSender_getDataToSend(const tup_frameSender_t* descriptor_p, const void** const buf_out_pp, size_t* size_bytes_out_p);
-tup_frameSender_error_t tup_frameSender_txCompleted(tup_frameSender_t* descriptor_p, size_t actuallySent_bytes);
+tup_frameSender_error_t tup_frameSender_txCompleted(tup_frameSender_t* descriptor_p, size_t actuallySent_bytes, bool* isFinished_out_p);
 
 #if defined(__cplusplus)
 } // extern "C"

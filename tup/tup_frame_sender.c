@@ -17,7 +17,7 @@ typedef struct
     volatile tup_frameSender_status_t status;
 } descriptor_t;
 
-static_assert(sizeof(descriptor_t) <= sizeof(tup_frameSender_t), "Adjust the \"privateData\" field size in the \"tup_frameSender_descriptor_t\" struct");
+static_assert(sizeof(descriptor_t) <= sizeof(tup_frameSender_t), "Adjust the \"privateData\" field size in the \"tup_frameSender_t\" struct");
 
 #define _DESCR(d, qual)                                 \
     assert(d != NULL);                                  \
@@ -138,7 +138,7 @@ tup_frameSender_error_t tup_frameSender_getDataToSend(const tup_frameSender_t* d
     return tup_frameSender_error_ok;
 }
 
-tup_frameSender_error_t tup_frameSender_txCompleted(tup_frameSender_t* descriptor_p, size_t actuallySent_bytes)
+tup_frameSender_error_t tup_frameSender_txCompleted(tup_frameSender_t* descriptor_p, size_t actuallySent_bytes, bool* isFinished_out_p)
 {
     DESCR(descriptor_p);
 
@@ -147,16 +147,24 @@ tup_frameSender_error_t tup_frameSender_txCompleted(tup_frameSender_t* descripto
         return tup_frameSender_error_invalidOperation;
     }
 
+    bool isFinished = false;
+
     descr_p->sendPos += actuallySent_bytes;
     const size_t fullFrameSize = TUP_HEADER_SIZE_BYTES + descr_p->fullBodySize_bytes;
 
-    if (actuallySent_bytes == fullFrameSize)
+    if (descr_p->sendPos == fullFrameSize)
     {
         descr_p->status = tup_frameSender_status_sent;
+        isFinished = true;
     }
-    else if (actuallySent_bytes > fullFrameSize)
+    else if (descr_p->sendPos > fullFrameSize)
     {
         descr_p->status = tup_frameSender_status_fail;
+    }
+
+    if (isFinished_out_p != NULL)
+    {
+        *isFinished_out_p = isFinished;
     }
 
     return tup_frameSender_error_ok;

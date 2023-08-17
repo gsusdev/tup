@@ -9,7 +9,7 @@ FinForm::FinForm(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    initCopList(*ui->cbCop);
+    initCopList(*ui->cbCop, tup_v1_cop_fin);
 }
 
 FinForm::~FinForm()
@@ -21,7 +21,7 @@ PFinFrame FinForm::getFrame() const
 {
     auto ptr = PFinFrame(new tup_v1_fin_t());
 
-    ptr->j = ui->sbJ->value();
+    ptr->j = ui->leJ->text().toULong(nullptr, 0);
     ptr->cop = static_cast<tup_v1_cop_t>(ui->cbCop->currentData().toUInt());
 
     return ptr;
@@ -29,6 +29,6 @@ PFinFrame FinForm::getFrame() const
 
 void FinForm::setFrame(PFinFrame value_p)
 {
-    ui->sbJ->setValue(value_p->j);
+    ui->leJ->setText(QString::number(value_p->j));
     ui->cbCop->setCurrentIndex(ui->cbCop->findData(value_p->cop));
 }

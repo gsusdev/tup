@@ -59,9 +59,10 @@ tup_body_error_t tup_v1_body_check(const void volatile* buf_p, size_t fullSize_b
         return err;
     }
 
+    const tup_checksum_t receivedCrc = tup_endianness_fromBE32(*receivedCrc_p);
     const tup_checksum_t validCrc = tup_crc32_calculate(buf_p, dataSize);
 
-    if (validCrc != *receivedCrc_p)
+    if (validCrc != receivedCrc)
     {
         return tup_body_error_invalidChecksum;
     }
@@ -73,13 +74,13 @@ tup_body_error_t tup_v1_body_getType(const void volatile* buf_p, size_t fullSize
 {
     assert(type_out_p != NULL);
 
-    const size_t cop_offset = 5;
+    const size_t cop_offset = 4;
     if (fullSize_bytes <= cop_offset)
     {
         return tup_body_error_invalidSize;
     }
 
-    const tup_v1_cop_t* ptr = (const tup_v1_cop_t*)((uintptr_t)buf_p + cop_offset);
+    const uint8_t volatile* ptr = (const uint8_t volatile*)((uintptr_t)buf_p + cop_offset);
     *type_out_p = *ptr;
 
     return tup_body_error_ok;
@@ -363,7 +364,7 @@ tup_body_error_t tup_v1_data_decode(const void volatile* buf_in_p, size_t bufSiz
     out_p->end = tup_bufReader_readU8(&bufReader, &ok) == 1u;
 
     const size_t fieldsSize = tup_bufReader_getSize(&bufReader) + sizeof(tup_checksum_t);
-    if (bufSize_bytes <= fieldsSize)
+    if (bufSize_bytes < fieldsSize)
     {
         return tup_body_error_invalidSize;
     }

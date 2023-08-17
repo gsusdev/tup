@@ -9,7 +9,7 @@ SynForm::SynForm(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    initCopList(*ui->cbCop);
+    initCopList(*ui->cbCop, tup_v1_cop_syn);
 }
 
 SynForm::~SynForm()
@@ -21,16 +21,16 @@ PSynFrame SynForm::getFrame() const
 {
     auto ptr = PSynFrame(new tup_v1_syn_t());
 
-    ptr->j = ui->sbJ->value();
+    ptr->j = ui->leJ->text().toULong(nullptr, 0);
     ptr->cop = static_cast<tup_v1_cop_t>(ui->cbCop->currentData().toUInt());
-    ptr->windowSize = ui->sbWindowSize->value();
+    ptr->windowSize = ui->leWindowSize->text().toULong(nullptr, 0);
 
     return ptr;
 }
 
 void SynForm::setFrame(PSynFrame value_p)
 {
-    ui->sbJ->setValue(value_p->j);
+    ui->leJ->setText(QString::number(value_p->j));
     ui->cbCop->setCurrentIndex(ui->cbCop->findData(value_p->cop));
-    ui->sbWindowSize->setValue(value_p->windowSize);
+    ui->leWindowSize->setText(QString::number(value_p->windowSize));
 }
