@@ -25,9 +25,12 @@ void TupReceiver::setPort(QIODevice* port_p)
 
     _port_p = port_p;
 
-    connect(_port_p, &QObject::destroyed, this, &TupReceiver::portDestroyed);
-    connect(_port_p, &QIODevice::readyRead, this, &TupReceiver::portReadyRead);
-    connect(_port_p, &QIODevice::aboutToClose, this, &TupReceiver::portAboutToClose);
+    if (_port_p != nullptr)
+    {
+        connect(_port_p, &QObject::destroyed, this, &TupReceiver::portDestroyed);
+        connect(_port_p, &QIODevice::readyRead, this, &TupReceiver::portReadyRead);
+        connect(_port_p, &QIODevice::aboutToClose, this, &TupReceiver::portAboutToClose);
+    }
 }
 
 void TupReceiver::portDestroyed(QObject* obj)
@@ -46,18 +49,11 @@ void TupReceiver::portReadyRead()
 {
     const auto receivedData = _port_p->readAll();
 
-    auto err = tup_frameReceiver_received(&frameReceiver, receivedData.data(), receivedData.size());
+    bool isHandlingNeeded;
+    auto err = tup_frameReceiver_received(&_frameReceiver, receivedData.data(), receivedData.size(), &isHandlingNeeded);
     if (err != tup_frameReceiver_error_ok)
     {
         qDebug() << "frameReceiver_received error " << err;
-        return;
-    }
-
-    bool isHandlingNeeded;
-    err = tup_frameReceiver_isHandlingNeeded(&frameReceiver, &isHandlingNeeded);
-    if (err != tup_frameReceiver_error_ok)
-    {
-        qDebug() << "frameReceiver_isHandlingNeeded error " << err;
         return;
     }
 
@@ -69,7 +65,7 @@ void TupReceiver::portReadyRead()
 
 void TupReceiver::receiverHandlingNeeded()
 {
-    auto err = tup_frameReceiver_handle(&frameReceiver);
+    auto err = tup_frameReceiver_handle(&_frameReceiver);
     if (err != tup_frameReceiver_error_ok)
     {
         qDebug() << "frameReceiver_handle error " << err;
@@ -77,7 +73,7 @@ void TupReceiver::receiverHandlingNeeded()
     }
 
     tup_frameReceiver_status_t status;
-    err = tup_frameReceiver_getStatus(&frameReceiver, &status);
+    err = tup_frameReceiver_getStatus(&_frameReceiver, &status);
     if (err != tup_frameReceiver_error_ok)
     {
         qDebug() << "frameReceiver_getStatus error " << err;
@@ -88,8 +84,8 @@ void TupReceiver::receiverHandlingNeeded()
     {
         case tup_frameReceiver_status_received:
             frameReceived();
-            tup_frameReceiver_reset(&frameReceiver);
-            tup_frameReceiver_listen(&frameReceiver);
+            tup_frameReceiver_reset(&_frameReceiver);
+            tup_frameReceiver_listen(&_frameReceiver);
             break;
 
         case tup_frameReceiver_status_receiving:
@@ -98,8 +94,8 @@ void TupReceiver::receiverHandlingNeeded()
 
         default:
             emit badFrameReceived(status);
-            tup_frameReceiver_reset(&frameReceiver);
-            tup_frameReceiver_listen(&frameReceiver);
+            tup_frameReceiver_reset(&_frameReceiver);
+            tup_frameReceiver_listen(&_frameReceiver);
     }
 }
 
@@ -110,14 +106,14 @@ void TupReceiver::reset()
     init.inputBuffer_p = _buf.data();
     init.bufferSize_bytes = _buf.size();
 
-    auto err = tup_frameReceiver_init(&frameReceiver, &init);
+    auto err = tup_frameReceiver_init(&_frameReceiver, &init);
     if (err != tup_frameReceiver_error_ok)
     {
         qDebug() << "frameReceiver_init error " << err;
         return;
     }
 
-    err = tup_frameReceiver_listen(&frameReceiver);
+    err = tup_frameReceiver_listen(&_frameReceiver);
     if (err != tup_frameReceiver_error_ok)
     {
         qDebug() << "frameReceiver_listen error " << err;
@@ -131,7 +127,7 @@ void TupReceiver::frameReceived()
     tup_version_t version;
     volatile const void* body_p;
 
-    auto errRecv = tup_frameReceiver_getReceivedBody(&frameReceiver, &body_p, &size, &version);
+    auto errRecv = tup_frameReceiver_getReceivedBody(&_frameReceiver, &body_p, &size, &version);
     if (errRecv != tup_frameReceiver_error_ok)
     {
         qDebug() << "frameReceiver_getReceivedBody error " << errRecv;

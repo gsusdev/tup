@@ -21,9 +21,12 @@ void TupSender::setPort(QIODevice* port_p)
 
     _port_p = port_p;
 
-    connect(_port_p, &QObject::destroyed, this, &TupSender::portDestroyed);
-    connect(_port_p, &QIODevice::bytesWritten, this, &TupSender::portBytesWritten);
-    connect(_port_p, &QIODevice::aboutToClose, this, &TupSender::portAboutToClose);
+    if (_port_p != nullptr)
+    {
+        connect(_port_p, &QObject::destroyed, this, &TupSender::portDestroyed);
+        connect(_port_p, &QIODevice::bytesWritten, this, &TupSender::portBytesWritten);
+        connect(_port_p, &QIODevice::aboutToClose, this, &TupSender::portAboutToClose);
+    }
 }
 
 bool TupSender::sendSyn(const tup_v1_syn_t* data_p)

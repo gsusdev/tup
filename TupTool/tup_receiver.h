@@ -46,5 +46,5 @@ private:
 
     QIODevice* _port_p = nullptr;
     QByteArray _buf;
-    tup_frameReceiver_t frameReceiver;
+    tup_frameReceiver_t _frameReceiver;
 };

@@ -24,16 +24,21 @@ SOURCES += \
     ../tup/tup_frame_receiver.c \
     ../tup/tup_frame_sender.c \
     ../tup/tup_header.c \
+    ../tup/tup_platform.c \
     ../tup/tup_v1_body.c \
     ../tup/tup_v1_transfer.c \
-    form_ack.cpp \
-    form_data.cpp \
-    form_fin.cpp \
-    form_syn.cpp \
+    ack_widget.cpp \
+    coder_widget.cpp \
+    data_widget.cpp \
+    fin_widget.cpp \
+    instance_form.cpp \
     main.cpp \
     mainwindow.cpp \
+    syn_widget.cpp \
+    transfer_widget.cpp \
     tup_receiver.cpp \
     tup_sender.cpp \
+    tup_transfer.cpp \
     utils.cpp
 
 HEADERS += \
@@ -45,26 +50,35 @@ HEADERS += \
     ../tup/tup_frame_receiver.h \
     ../tup/tup_frame_sender.h \
     ../tup/tup_header.h \
+    ../tup/tup_platform.h \
+    ../tup/tup_port.h \
     ../tup/tup_types.h \
     ../tup/tup_v1_body.h \
     ../tup/tup_v1_transfer.h \
     ../tup/tup_v1_types.h \
+    ack_widget.h \
+    coder_widget.h \
     common.h \
-    form_ack.h \
-    form_data.h \
-    form_fin.h \
-    form_syn.h \
+    data_widget.h \
+    fin_widget.h \
+    instance_form.h \
     mainwindow.h \
+    syn_widget.h \
+    transfer_widget.h \
     tup_receiver.h \
     tup_sender.h \
+    tup_transfer.h \
     utils.h
 
 FORMS += \
-    form_ack.ui \
-    form_data.ui \
-    form_fin.ui \
-    form_syn.ui \
-    mainwindow.ui
+    ack_widget.ui \
+    coder_widget.ui \
+    data_widget.ui \
+    fin_widget.ui \
+    instance_form.ui \
+    mainwindow.ui \
+    syn_widget.ui \
+    transfer_widget.ui
 
 INCLUDEPATH += ../tup
 

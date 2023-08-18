@@ -38,6 +38,7 @@ void logFunc(QtMsgType type, const QMessageLogContext &context, const QString &m
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
     MainWindow w;
     w.show();
 

@@ -13,6 +13,20 @@
 
 static tup_body_error_t getCrcParams(const void volatile* buf_p, size_t fullSize_bytes, const tup_checksum_t** const checksum_out_pp, size_t* dataSize_out_p);
 
+size_t tup_v1_body_getMinSize()
+{
+    const size_t jSize = sizeof(uint32_t);
+    const size_t copSize = sizeof(uint8_t);
+    const size_t errorOrWinSizeSize = sizeof(uint32_t);
+    const size_t isFinalSize = sizeof(uint8_t);
+    const size_t crcSize = sizeof(uint32_t);
+
+    size_t size = jSize + copSize + errorOrWinSizeSize + crcSize;
+    assert(errorOrWinSizeSize >= isFinalSize);
+
+    return size;
+}
+
 tup_body_error_t tup_v1_body_getSizeWithCrc_bytes(size_t bodyWoCrcSize_bytes, size_t* fullSize_out_p)
 {
     assert(fullSize_out_p != NULL);

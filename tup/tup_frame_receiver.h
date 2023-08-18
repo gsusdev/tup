@@ -70,10 +70,11 @@ tup_frameReceiver_error_t tup_frameReceiver_getDirectBuffer(
 tup_frameReceiver_error_t tup_frameReceiver_received(
     tup_frameReceiver_t* descriptor_p, 
     const void volatile* buf_p, 
-    size_t size_bytes);
+    size_t size_bytes,
+    bool* isHandlingNeeded_out_p);
 
 tup_frameReceiver_error_t tup_frameReceiver_handle(tup_frameReceiver_t* descriptor_p);
-tup_frameReceiver_error_t tup_frameReceiver_isHandlingNeeded(tup_frameReceiver_t* descriptor_p, bool* result_out_p);
+//tup_frameReceiver_error_t tup_frameReceiver_isHandlingNeeded(tup_frameReceiver_t* descriptor_p, bool* result_out_p);
 
 #if defined(__cplusplus)
 } // extern "C"

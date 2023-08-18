@@ -15,13 +15,12 @@ typedef struct
     volatile uint8_t* buffer_p;
     volatile uint8_t* _Atomic curPos_p;
     size_t bufferSize_bytes;
-    size_t expectedSize_bytes;	
+    size_t expectedSize_bytes;
     size_t fullBodySize_bytes;
     size_t fullFrameSize_bytes;
     tup_version_t version;
     volatile _Atomic tup_frameReceiver_status_t status;
     bool isHeaderDecoded;
-    bool isHandlingNeeded;
 } descriptor_t;
 
 static_assert(sizeof(descriptor_t) <= sizeof(tup_frameReceiver_t), "Adjust the \"privateData\" field size in the \"tup_frameReceiver_t\" struct");
@@ -76,7 +75,6 @@ tup_frameReceiver_error_t tup_frameReceiver_reset(tup_frameReceiver_t* descripto
     descr_p->status = tup_frameReceiver_status_idle;
     descr_p->curPos_p = descr_p->buffer_p;
     descr_p->isHeaderDecoded = false;
-    descr_p->isHandlingNeeded = false;
     descr_p->expectedSize_bytes = 0;
     descr_p->fullBodySize_bytes = 0;
     descr_p->fullFrameSize_bytes = 0;
@@ -189,7 +187,7 @@ tup_frameReceiver_error_t tup_frameReceiver_getDirectBuffer(
     return tup_frameReceiver_error_ok;
 }
 
-tup_frameReceiver_error_t tup_frameReceiver_isHandlingNeeded(
+/*tup_frameReceiver_error_t tup_frameReceiver_isHandlingNeeded(
     tup_frameReceiver_t* descriptor_p, bool* result_out_p)
 {
     CDESCR(descriptor_p);
@@ -205,12 +203,13 @@ tup_frameReceiver_error_t tup_frameReceiver_isHandlingNeeded(
     }
 
     return tup_frameReceiver_error_ok;
-}
+}*/
 
 tup_frameReceiver_error_t tup_frameReceiver_received(
     tup_frameReceiver_t* descriptor_p,
     const void volatile* buf_p, 
-    size_t size_bytes)
+    size_t size_bytes,
+    bool* isHandlingNeeded_out_p)
 {
     DESCR(descriptor_p);
 
@@ -241,8 +240,13 @@ tup_frameReceiver_error_t tup_frameReceiver_received(
     const size_t usedSize = usedBufSize(descr_p);
     const size_t headerSize = TUP_HEADER_SIZE_BYTES;
 
-    descr_p->isHandlingNeeded |= !descr_p->isHeaderDecoded && (usedSize >= headerSize);
-    descr_p->isHandlingNeeded |= descr_p->isHeaderDecoded && (usedSize >= descr_p->fullFrameSize_bytes);
+    if (isHandlingNeeded_out_p != NULL)
+    {
+        *isHandlingNeeded_out_p = false;
+
+        *isHandlingNeeded_out_p |= !descr_p->isHeaderDecoded && (usedSize >= headerSize);
+        *isHandlingNeeded_out_p |= descr_p->isHeaderDecoded && (usedSize >= descr_p->fullFrameSize_bytes);
+    }
     
     return tup_frameReceiver_error_ok;
 }
@@ -265,7 +269,6 @@ tup_frameReceiver_error_t tup_frameReceiver_handle(tup_frameReceiver_t* descript
         {
             tup_header_t header;
             const tup_header_error_t hdrErr = tup_header_decode(descr_p->buffer_p, headerSize, &header);
-            descr_p->isHandlingNeeded = false;
 
             if (hdrErr == tup_header_error_ok)
             {
@@ -310,7 +313,6 @@ tup_frameReceiver_error_t tup_frameReceiver_handle(tup_frameReceiver_t* descript
     {
         const void volatile* bodyStart_p = bodyStart(descr_p);
         const tup_body_error_t err = tup_body_check(descr_p->version, bodyStart_p, descr_p->fullBodySize_bytes);
-        descr_p->isHandlingNeeded = false;
 
         if (err == tup_body_error_ok)
         {
