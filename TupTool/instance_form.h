@@ -6,6 +6,7 @@
 #include <QSerialPort>
 
 #include "coder_widget.h"
+#include "transfer_widget.h"
 
 namespace Ui {
 class InstanceForm;
@@ -22,6 +23,7 @@ public:
 private slots:
     void butRefreshClicked(bool checked);
     void butOpenCloseClicked(bool checked);
+    void tabWidgetCurrentChanged(int index);
 
 private:
     void initPortList(QComboBox& comboBox);
@@ -30,6 +32,7 @@ private:
     Ui::InstanceForm *ui;
 
     CoderWidget* _coder_p = nullptr;
+    TransferWidget* _transfer_p = nullptr;
 
     QSerialPort _port;
 };

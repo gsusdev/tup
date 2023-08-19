@@ -3,6 +3,7 @@
 
 #include <QSerialPortInfo>
 #include <QMessageBox>
+#include <QTabWidget>
 
 InstanceForm::InstanceForm(QWidget *parent) :
     QMainWindow(parent),
@@ -16,7 +17,10 @@ InstanceForm::InstanceForm(QWidget *parent) :
     connect(ui->butRefresh, &QPushButton::clicked, this, &InstanceForm::butRefreshClicked);
     connect(ui->butOpenClose, &QPushButton::clicked, this, &InstanceForm::butOpenCloseClicked);
 
+    connect(ui->tabWidget, &QTabWidget::currentChanged, this, &InstanceForm::tabWidgetCurrentChanged);
+
     _coder_p = new CoderWidget(ui->tabCoder);
+    _transfer_p = new TransferWidget(ui->tabTransfer);
 
     _coder_p->setPort(&_port);
 }
@@ -62,6 +66,22 @@ void InstanceForm::butOpenCloseClicked(bool checked)
     }
 }
 
+void InstanceForm::tabWidgetCurrentChanged(int index)
+{
+    auto widget_p = ui->tabWidget->widget(index);
+
+    if (widget_p == ui->tabCoder)
+    {
+        _transfer_p->setPort(nullptr);
+        _coder_p->setPort(&_port);
+    }
+    else if (widget_p == ui->tabTransfer)
+    {
+        _coder_p->setPort(nullptr);
+        _transfer_p->setName(ui->cbPortName->currentText());
+        _transfer_p->setPort(&_port);
+    }
+}
 
 void InstanceForm::initPortList(QComboBox& comboBox)
 {

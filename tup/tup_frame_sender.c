@@ -14,7 +14,7 @@ typedef struct
     volatile size_t sendPos;
     const void* sendingBody_p;
     size_t fullBodySize_bytes;
-    volatile tup_frameSender_status_t status;
+    volatile _Atomic tup_frameSender_status_t status;
 } descriptor_t;
 
 static_assert(sizeof(descriptor_t) <= sizeof(tup_frameSender_t), "Adjust the \"privateData\" field size in the \"tup_frameSender_t\" struct");

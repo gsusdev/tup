@@ -20,6 +20,7 @@ public:
 
 public slots:
     void logText(QString text);
+    void logTextWoReturn(QString text);
 
 private slots:
     void butNewInstanceClicked(bool checked);

@@ -17,6 +17,10 @@ MainWindow::MainWindow(QWidget *parent)
     qRegisterMetaType<PFinFrame>("PFinFrame");
     qRegisterMetaType<PDataFrame>("PDataFrame");
 
+    qRegisterMetaType<quintptr>("quintptr");
+
+
+
     ui->setupUi(this);      
 
     connect(ui->butNewInstance, &QPushButton::clicked, this, &MainWindow::butNewInstanceClicked);
@@ -29,7 +33,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::logText(QString text)
 {
-    ui->pteLog->appendPlainText(text);
+    ui->pteLog->appendPlainText(text);    
+}
+
+void MainWindow::logTextWoReturn(QString text)
+{
+    ui->pteLog->moveCursor(QTextCursor::End);
+    ui->pteLog->insertPlainText(text);
+    ui->pteLog->moveCursor(QTextCursor::End);
 }
 
 void MainWindow::butNewInstanceClicked(bool checked)

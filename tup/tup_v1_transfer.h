@@ -17,7 +17,16 @@ typedef enum
     , tup_transfer_error_noActiveTransfer	
 } tup_transfer_error_t;
 
+typedef enum
+{
+    tup_frameError_crc,
+    tup_frameError_size,
+    tup_frameError_version,
+    tup_frameError_orphanAck
+} tup_frameError_t;
+
 typedef void (*tup_transfer_onCompleted_t)(tup_transfer_result_t resultCode, uintptr_t tag);
+typedef void (*tup_transfer_onInvalidFrame_t)(tup_frameError_t error, uintptr_t tag);
 typedef void (*tup_transfer_onSyn_t)(uint32_t j, size_t windowSize, uintptr_t tag);
 typedef void (*tup_transfer_onFin_t)(uintptr_t tag);
 typedef void (*tup_transfer_onData_t)(const void volatile* payload_p, size_t payloadSize_bytes, bool isFinal, uintptr_t tag);
@@ -25,7 +34,7 @@ typedef void (*tup_transfer_onFail_t)(tup_transfer_fail_t failCode, uintptr_t ta
 
 typedef struct
 {
-    uint8_t privateData[232];
+    uint8_t privateData[240];
 } tup_transfer_t;
 
 typedef struct
@@ -42,9 +51,12 @@ typedef struct
     tup_transfer_onData_t onData;
     tup_transfer_onCompleted_t onCompleted;
     tup_transfer_onFail_t onFail;
+    tup_transfer_onInvalidFrame_t onInvalidFrame;
     uintptr_t userCallbackValue;    
     uintptr_t txCallbackValue;
     uintptr_t signal;
+    uintptr_t signalFuncsCallback;
+    const char* name;
 } tup_transfer_initStruct_t;
 
 #if defined(__cplusplus)

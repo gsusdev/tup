@@ -65,13 +65,16 @@ typedef struct
     tup_transfer_onData_t onData;
     tup_transfer_onCompleted_t onCompleted;
     tup_transfer_onFail_t onFail;
+    tup_transfer_onInvalidFrame_t onInvalidFrame;
     uintptr_t userCallbackValue;
     uintptr_t txCallbackValue;
     tup_frameSender_t frameSender;
     tup_frameReceiver_t frameReceiver;
     uintptr_t signal;
+    uintptr_t signalFuncsCallback;
     _Atomic bool rxError;
     _Atomic bool isRunning;
+    const char* name;
 } descriptor_t;
 
 static_assert(sizeof(descriptor_t) <= sizeof(tup_transfer_t), "Adjust the \"privateData\" field size in the \"tup_transfer_t\" struct");
@@ -106,9 +109,12 @@ static bool receivedData(descriptor_t* descr_p, const volatile void* body_p, siz
 static bool receivedAck(descriptor_t* descr_p, const volatile void* body_p, size_t bodySize);
 static bool receivedFin(descriptor_t* descr_p, const volatile void* body_p, size_t bodySize);
 static bool receivedSyn(descriptor_t* descr_p, const volatile void* body_p, size_t bodySize);
+static bool receivedBadFrame(descriptor_t* descr_p, tup_frameError_t error);
 
 static void invokeHandlingFunc(descriptor_t* descr_p);
 static bool waitForSignal(descriptor_t* descr_p, uint32_t timeout_ms);
+
+static void log(const descriptor_t* descr_p, const char* text);
 
 tup_transfer_error_t tup_transfer_init(tup_transfer_t* descriptor_p, const tup_transfer_initStruct_t* init_p)
 {
@@ -121,7 +127,10 @@ tup_transfer_error_t tup_transfer_init(tup_transfer_t* descriptor_p, const tup_t
 
     ok &= init_p->onSyn != NULL;
     ok &= init_p->onFin != NULL;
-    ok &= init_p->onData != NULL;    
+    ok &= init_p->onData != NULL;
+    ok &= init_p->onCompleted != NULL;
+    ok &= init_p->onFail != NULL;
+    ok &= init_p->onInvalidFrame != NULL;
     ok &= layoutBuffers(descr_p, init_p->workBuffer_p, init_p->workBufferSize_bytes);
 
     if (!ok)
@@ -141,11 +150,14 @@ tup_transfer_error_t tup_transfer_init(tup_transfer_t* descriptor_p, const tup_t
     descr_p->onData = init_p->onData;
     descr_p->onCompleted = init_p->onCompleted;
     descr_p->onFail = init_p->onFail;
+    descr_p->onInvalidFrame = init_p->onInvalidFrame;
     descr_p->userCallbackValue = init_p->userCallbackValue;
     descr_p->txCallbackValue = init_p->txCallbackValue;
     descr_p->rxError = false;
     descr_p->signal = init_p->signal;
+    descr_p->signalFuncsCallback = init_p->signalFuncsCallback;
     descr_p->isRunning = false;
+    descr_p->name = init_p->name;
 
     tup_frameSender_initStruct_t senderInit;
     const tup_frameSender_error_t senderErr = tup_frameSender_init(&descr_p->frameSender, &senderInit);
@@ -165,6 +177,7 @@ tup_transfer_error_t tup_transfer_init(tup_transfer_t* descriptor_p, const tup_t
         return tup_transfer_error_internal;
     }
 
+    log(descr_p, "frameReceiver_listen()");
     receiverErr = tup_frameReceiver_listen(&descr_p->frameReceiver);
     if (receiverErr != tup_frameReceiver_error_ok)
     {
@@ -195,6 +208,7 @@ tup_transfer_error_t tup_transfer_sendSyn(tup_transfer_t* descriptor_p, uint32_t
     const tup_body_error_t bodyErr = tup_v1_syn_encode(&frame, descr_p->bodyBuffer_p, descr_p->bodyBufferSize_bytes, &descr_p->lastSend.bodyFullSize);
     if (bodyErr == tup_body_error_ok)
     {
+        log(descr_p, "SendSyn: send()");
         ok = send(descr_p, frame.j, frame.cop, false, descr_p->bodyBuffer_p, descr_p->lastSend.bodyFullSize);
     }
 
@@ -230,6 +244,7 @@ tup_transfer_error_t tup_transfer_sendFin(tup_transfer_t* descriptor_p)
     const tup_body_error_t bodyErr = tup_v1_fin_encode(&frame, descr_p->bodyBuffer_p, descr_p->bodyBufferSize_bytes, &descr_p->lastSend.bodyFullSize);
     if (bodyErr == tup_body_error_ok)
     {
+        log(descr_p, "SendFin: send()");
         ok = send(descr_p, frame.j, frame.cop, false, descr_p->bodyBuffer_p, descr_p->lastSend.bodyFullSize);
     }
 
@@ -269,6 +284,7 @@ tup_transfer_error_t tup_transfer_sendData(tup_transfer_t* descriptor_p, const v
     const tup_body_error_t bodyErr = tup_v1_data_encode(&frame, descr_p->bodyBuffer_p, descr_p->bodyBufferSize_bytes, &descr_p->lastSend.bodyFullSize);
     if (bodyErr == tup_body_error_ok)
     {
+        log(descr_p, "SendData: send()");
         ok = send(descr_p, frame.j, frame.cop, false, descr_p->bodyBuffer_p, descr_p->lastSend.bodyFullSize);
     }
 
@@ -301,10 +317,17 @@ tup_transfer_error_t tup_transfer_setResult(tup_transfer_t* descriptor_p, tup_tr
     const tup_body_error_t bodyErr = tup_v1_ack_encode(&frame, descr_p->bodyBuffer_p, descr_p->bodyBufferSize_bytes, &descr_p->lastSend.bodyFullSize);
     if (bodyErr == tup_body_error_ok)
     {
+        log(descr_p, "SetResult: send()");
         ok = send(descr_p, frame.j, frame.cop, false, descr_p->bodyBuffer_p, descr_p->lastSend.bodyFullSize);
     }
 
     descr_p->state = state_idle;
+    log(descr_p, "frameReceiver_listen()");
+    const tup_frameReceiver_error_t err = tup_frameReceiver_listen(&descr_p->frameReceiver);
+    if (err != tup_frameReceiver_error_ok)
+    {
+        ok = false;
+    }
 
     if (!ok)
     {
@@ -317,6 +340,8 @@ tup_transfer_error_t tup_transfer_setResult(tup_transfer_t* descriptor_p, tup_tr
 tup_transfer_error_t tup_transfer_handle(tup_transfer_t* descriptor_p)
 {
     DESCR(descriptor_p);
+
+    tup_frameReceiver_handle(&descr_p->frameReceiver);
 
     state_t state = descr_p->state;
     tup_transfer_error_t result;
@@ -415,7 +440,19 @@ void tup_transfer_transmitted(tup_transfer_t* descriptor_p, size_t size_bytes)
     assert(descriptor_p != NULL);
     descriptor_t* descr_p = (descriptor_t*)descriptor_p;
 
-    tup_frameSender_txCompleted(&descr_p->frameSender, size_bytes, NULL);
+    bool isFinished;
+    tup_frameSender_txCompleted(&descr_p->frameSender, size_bytes, &isFinished);
+
+    if (!isFinished)
+    {
+        const void* bufToSend_p;
+        size_t sendSize;
+        const tup_frameSender_error_t err = tup_frameSender_getDataToSend(&descr_p->frameSender, &bufToSend_p, &sendSize);
+        if (err == tup_frameSender_error_ok)
+        {
+            tup_link_transmit(bufToSend_p, sendSize, descr_p->txCallbackValue);
+        }
+    }
 }
 
 static bool getNextJ(const descriptor_t* descr_p, uint32_t* j_out_p)
@@ -469,9 +506,10 @@ static bool receivedSyn(descriptor_t* descr_p, const volatile void* body_p, size
         return false;
     }
 
+    tup_frameReceiver_reset(&descr_p->frameReceiver);
+
     descr_p->state = state_waitResult;
     descr_p->lastReceivedJ = syn.j;
-
     descr_p->onSyn(syn.j, syn.windowSize, descr_p->userCallbackValue);
 
     return true;
@@ -487,23 +525,32 @@ static bool receivedFin(descriptor_t* descr_p, const volatile void* body_p, size
         return false;
     }
 
+    tup_frameReceiver_reset(&descr_p->frameReceiver);
+
     descr_p->state = state_waitResult;
     descr_p->lastReceivedJ = fin.j;
-
     descr_p->onFin(descr_p->userCallbackValue);
+
+    return true;
+}
+
+static bool receivedBadFrame(descriptor_t* descr_p, tup_frameError_t error)
+{
+    descr_p->onInvalidFrame(error, descr_p->userCallbackValue);
 
     return true;
 }
 
 static bool receivedAck(descriptor_t* descr_p, const volatile void* body_p, size_t bodySize)
 {
-    //TODO: this should not happen, think of what to do if it does
-
-    (void)descr_p;
     (void)body_p;
     (void)bodySize;
 
-    return true;
+    tup_frameReceiver_reset(&descr_p->frameReceiver);
+    tup_frameReceiver_listen(&descr_p->frameReceiver);
+
+    const bool result = receivedBadFrame(descr_p, tup_frameError_orphanAck);
+    return result;
 }
 
 static bool receivedData(descriptor_t* descr_p, const volatile void* body_p, size_t bodySize)
@@ -516,9 +563,10 @@ static bool receivedData(descriptor_t* descr_p, const volatile void* body_p, siz
         return false;
     }
 
+    tup_frameReceiver_reset(&descr_p->frameReceiver);
+
     descr_p->state = state_waitResult;
     descr_p->lastReceivedJ = data.j;
-
     descr_p->onData(data.payload_p, data.payloadSize_bytes, data.end, descr_p->userCallbackValue);
 
     return true;
@@ -528,8 +576,8 @@ static tup_transfer_error_t handleIdle(descriptor_t* descr_p)
 {
     // if no receive error
     bool rxError = true;
-    if (!atomic_compare_exchange_strong(&descr_p->rxError, &rxError, false))
-    {
+    if (atomic_compare_exchange_strong(&descr_p->rxError, &rxError, false))
+    {        
         tup_frameReceiver_reset(&descr_p->frameReceiver);
         descr_p->lastSend.time_ms = tup_getCurrentTime_ms();
         descr_p->state = state_waitListen;
@@ -537,8 +585,8 @@ static tup_transfer_error_t handleIdle(descriptor_t* descr_p)
         return tup_transfer_error_ok;
     }
 
-    tup_frameReceiver_status_t status;
-    tup_frameReceiver_error_t recvErr = tup_frameReceiver_getStatus(&descr_p->frameReceiver, &status);
+    tup_frameReceiver_status_t receiverStatus;
+    tup_frameReceiver_error_t recvErr = tup_frameReceiver_getStatus(&descr_p->frameReceiver, &receiverStatus);
     if (recvErr != tup_frameReceiver_error_ok)
     {
         return tup_transfer_error_internal;
@@ -546,7 +594,7 @@ static tup_transfer_error_t handleIdle(descriptor_t* descr_p)
 
     bool ok = false;
 
-    if (status == tup_frameReceiver_status_received)
+    if (receiverStatus == tup_frameReceiver_status_received)
     {
         size_t size;
         tup_version_t version;
@@ -557,32 +605,71 @@ static tup_transfer_error_t handleIdle(descriptor_t* descr_p)
         {
             tup_v1_cop_t type;
             tup_body_error_t bodyErr = tup_v1_body_getType(body_p, size, &type);
+
             if (bodyErr == tup_body_error_ok)
             {
                 switch (type)
                 {
                     case tup_v1_cop_syn:
+                        log(descr_p, "Received SYN");
                         ok = receivedSyn(descr_p, body_p, size);
                         break;
 
                     case tup_v1_cop_ack:
+                        log(descr_p, "Received orphan ACK");
                         ok = receivedAck(descr_p, body_p, size);
                         break;
 
                     case tup_v1_cop_data:
+                        log(descr_p, "Received DATA");
                         ok = receivedData(descr_p, body_p, size);
                         break;
 
                     case tup_v1_cop_fin:
+                        log(descr_p, "Received FIN");
                         ok = receivedFin(descr_p, body_p, size);
                         break;
                 }
             }
+
         }
+
+
     }
     else
     {
-        ok = true;
+        if (receiverStatus != tup_frameReceiver_status_receiving)
+        {
+            tup_frameReceiver_reset(&descr_p->frameReceiver);
+            descr_p->state = state_waitResult;
+
+            switch (receiverStatus)
+            {
+                case tup_frameReceiver_status_invalidBodySize:
+                case tup_frameReceiver_status_bufferOverflow:
+                    log(descr_p, "Received too large frame");
+                    ok = receivedBadFrame(descr_p, tup_frameError_size);
+                    break;
+
+                case tup_frameReceiver_status_invalidBodyChecksum:
+                case tup_frameReceiver_status_invalidHeaderChecksum:
+                    log(descr_p, "Received invalid checksum");
+                    ok = receivedBadFrame(descr_p, tup_frameError_crc);
+                    break;
+
+                case tup_frameReceiver_status_invalidProtocol:
+                    log(descr_p, "Received invalid protocol");
+                    ok = receivedBadFrame(descr_p, tup_frameError_version);
+                    break;
+
+                default:
+                    ok = false;
+            }
+        }
+        else
+        {
+            ok = true;
+        }
     }
 
     if (!ok)
@@ -610,6 +697,7 @@ static tup_transfer_error_t handleWaitAck(descriptor_t* descr_p)
 
         if (status == tup_frameReceiver_status_received)
         {
+            log(descr_p, "Received ACK?");
             result = ackFail_badAck;
 
             const void volatile* body_p;
@@ -633,12 +721,21 @@ static tup_transfer_error_t handleWaitAck(descriptor_t* descr_p)
                     {
                         if (ack.j == descr_p->lastSend.j + 1)
                         {
-                            result = ackFail_ok;
-                            descr_p->onCompleted(ack.error, descr_p->userCallbackValue);
-                        } // sequence ok
-                    } // ack decoded successfully
-                } // is ack
-            } // got body
+                            log(descr_p, "Correct ACK");
+                            result = ackFail_ok;                            
+                            descr_p->onCompleted(ack.error, descr_p->userCallbackValue);                            
+                        }
+                        else
+                        {
+                            log(descr_p, "Invalid sequence counter");
+                        }
+                    }
+                }
+                else
+                {
+                    log(descr_p, "Not an ACK");
+                }
+            }
         } // frame received
         else if (status != tup_frameReceiver_status_receiving)
         {
@@ -653,6 +750,9 @@ static tup_transfer_error_t handleWaitAck(descriptor_t* descr_p)
     if (result == ackFail_ok)
     {
         descr_p->rxError = false;
+        descr_p->state = state_idle;
+
+        tup_frameReceiver_reset(&descr_p->frameReceiver);
         const tup_frameReceiver_error_t recvErr = tup_frameReceiver_listen(&descr_p->frameReceiver);
         if (recvErr != tup_frameReceiver_error_ok)
         {
@@ -663,20 +763,25 @@ static tup_transfer_error_t handleWaitAck(descriptor_t* descr_p)
     {
         failParams_t params;
         if (!getFailParams(descr_p, descr_p->lastSend.cop, result, &params))
-        {
+        {            
             return tup_transfer_error_internal;
         }
 
-        if (result == ackFail_badAck)
+        if ((result == ackFail_badAck) || (result == ackFail_wrongPkg))
         {
+            log(descr_p, "Wrong ACK");
+            tup_frameReceiver_reset(&descr_p->frameReceiver);
+
             if (descr_p->lastSend.attemptCount >= params.retryCount)
             {
+                log(descr_p, "Attempt limit exceeded");
                 descr_p->onFail(params.failCode, descr_p->userCallbackValue);
+                tup_frameReceiver_listen(&descr_p->frameReceiver);
+                descr_p->state = state_idle;
             }
             else
             {
-                tup_frameReceiver_reset(&descr_p->frameReceiver);
-
+                log(descr_p, "Retry");
                 descr_p->lastSend.time_ms = tup_getCurrentTime_ms();
                 descr_p->state = state_waitFlush;
             }
@@ -688,12 +793,16 @@ static tup_transfer_error_t handleWaitAck(descriptor_t* descr_p)
 
             if ((elapsed_ms >= params.timeout_ms) && (params.timeout_ms > 0))
             {
+                log(descr_p, "ACK timeout");
                 if (descr_p->lastSend.attemptCount >= params.retryCount)
                 {
+                    log(descr_p, "Attempt limit exceeded");
                     descr_p->onFail(params.failCode, descr_p->userCallbackValue);
+                    descr_p->state = state_idle;
                 }
                 else
                 {
+                    log(descr_p, "Retry");
                     descr_p->lastSend.time_ms = curTime_ms;
                     descr_p->state = state_waitRetry;
                 }
@@ -718,7 +827,15 @@ static tup_transfer_error_t handleWaitRetry(descriptor_t* descr_p)
         }
         else
         {
-            return tup_transfer_error_internal;
+            descr_p->lastSend.attemptCount++;
+            if (descr_p->lastSend.attemptCount >= descr_p->retryCount)
+            {
+                descr_p->state = state_waitAck;
+            }
+            else
+            {
+                descr_p->lastSend.time_ms = curTime_ms;
+            }
         }
     }
 
@@ -782,7 +899,7 @@ static void invokeHandlingFunc(descriptor_t* descr_p)
 {
     if (descr_p->signal != 0)
     {
-        tup_signal_fire(descr_p->signal);
+        tup_signal_fire(descr_p->signal, descr_p->signalFuncsCallback);
     }
 }
 
@@ -792,7 +909,7 @@ static bool waitForSignal(descriptor_t* descr_p, uint32_t timeout_ms)
 
     if (descr_p->signal != 0)
     {
-        result = tup_signal_wait(descr_p->signal, timeout_ms);
+        result = tup_signal_wait(descr_p->signal, timeout_ms, descr_p->signalFuncsCallback);
     }
 
     return result;
@@ -912,6 +1029,18 @@ static bool layoutBuffers(descriptor_t* descr_p, void volatile* buf_p, size_t bu
     descr_p->bodyBufferSize_bytes = halfBufSize;
 
     return true;
+}
+
+static void log(const descriptor_t* descr_p, const char* text)
+{
+    if (descr_p->name != NULL)
+    {
+        tup_log(descr_p->name);
+        tup_log(": ");
+    }
+
+    tup_log(text);
+    tup_log("\n");
 }
 
 static bool checkDescr(const descriptor_t* descr_p)

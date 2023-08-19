@@ -115,9 +115,9 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3"/>
       </widget>
-      <widget class="QWidget" name="tabInstance">
+      <widget class="QWidget" name="tabTransfer">
        <attribute name="title">
-        <string>Instance</string>
+        <string>Transfer</string>
        </attribute>
       </widget>
      </widget>
@@ -130,7 +130,7 @@
      <x>0</x>
      <y>0</y>
      <width>775</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

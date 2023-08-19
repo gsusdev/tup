@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QComboBox>
+#include <QIODevice>
 
 #include "tup_v1_body.h"
 
