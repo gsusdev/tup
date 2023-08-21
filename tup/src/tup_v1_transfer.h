@@ -31,27 +31,30 @@ typedef void (*tup_transfer_onSyn_t)(uint32_t j, size_t windowSize, uintptr_t ta
 typedef void (*tup_transfer_onFin_t)(uintptr_t tag);
 typedef void (*tup_transfer_onData_t)(const void volatile* payload_p, size_t payloadSize_bytes, bool isFinal, uintptr_t tag);
 typedef void (*tup_transfer_onFail_t)(tup_transfer_fail_t failCode, uintptr_t tag);
+typedef void (*tup_transfer_onAckSent_t)(uintptr_t tag);
 
 typedef struct
 {
-    uint8_t privateData[240];
+    uint8_t privateData[244];
 } tup_transfer_t;
 
 typedef struct
 {	
     void* workBuffer_p;
     size_t workBufferSize_bytes;	
+    size_t rxBufSize_bytes;
     uint32_t synTimeout_ms;
     uint32_t dataTimeout_ms;
-    uint32_t retryCount;
+    uint32_t tryCount;
     uint32_t retryPause_ms;
     uint32_t flushDuration_ms;
     tup_transfer_onSyn_t onSyn;
     tup_transfer_onFin_t onFin;
     tup_transfer_onData_t onData;
     tup_transfer_onCompleted_t onCompleted;
-    tup_transfer_onFail_t onFail;
+    tup_transfer_onFail_t onFail;    
     tup_transfer_onInvalidFrame_t onInvalidFrame;
+    tup_transfer_onAckSent_t onAckSent;
     uintptr_t userCallbackValue;    
     uintptr_t txCallbackValue;
     uintptr_t signal;
@@ -64,6 +67,7 @@ extern "C" {
 #endif
 
 tup_transfer_error_t tup_transfer_init(tup_transfer_t* descriptor_p, const tup_transfer_initStruct_t* init_p);
+tup_transfer_error_t tup_transfer_listen(tup_transfer_t* descriptor_p);
 
 tup_transfer_error_t tup_transfer_handle(tup_transfer_t* descriptor_p);
 

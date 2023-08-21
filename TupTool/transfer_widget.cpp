@@ -69,6 +69,8 @@ void TransferWidget::butSendDataClicked(bool checked)
 
 void TransferWidget::butClearInputClicked(bool checked)
 {
+    (void)checked;
+
     ui->teInput->clear();
 }
 

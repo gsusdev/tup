@@ -50,5 +50,3 @@ void MainWindow::butNewInstanceClicked(bool checked)
     auto instance_p = new InstanceForm(this);
     instance_p->show();
 }
-
-

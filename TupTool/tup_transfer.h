@@ -37,7 +37,6 @@ private slots:
     void portAboutToClose();
     void portReadyRead();
     void portBytesWritten(qint64 bytes);
-    void process();
 
     void slotTransmit(QByteArray data);
 

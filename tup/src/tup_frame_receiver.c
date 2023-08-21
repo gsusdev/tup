@@ -48,8 +48,6 @@ tup_frameReceiver_error_t tup_frameReceiver_init(
     assert(descriptor_p != NULL);
     assert(initStruct_p != NULL);
 
-    descriptor_t* descr_p = (descriptor_t*)descriptor_p;
-    
     bool initOk = true;
 
     initOk &= initStruct_p->inputBuffer_p != NULL;
@@ -59,6 +57,9 @@ tup_frameReceiver_error_t tup_frameReceiver_init(
     {
         return tup_frameReceiver_error_invalidInit;
     }
+
+    descriptor_t* descr_p = (descriptor_t*)descriptor_p;
+    memset(descr_p, 0, sizeof(*descr_p));
     
     descr_p->buffer_p = initStruct_p->inputBuffer_p;
     descr_p->bufferSize_bytes = initStruct_p->bufferSize_bytes;

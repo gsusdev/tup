@@ -44,6 +44,7 @@ bool tup_bufReader_init(tup_bufReader_t* descriptor_p, const void volatile* buf_
     }
 
     descriptor_t* descr_p = (descriptor_t*)descriptor_p;
+    memset(descr_p, 0, sizeof(*descr_p));
 
     descr_p->buf_p = buf_p;
     descr_p->cur_p = buf_p;
@@ -269,6 +270,7 @@ static void advance(descriptor_t* descr_p, size_t size_bytes)
 
 static bool checkDescr(const descriptor_t* descr_p)
 {
+    (void)descr_p;
     //TODO: implement some descriptor checking logic
     return true;
 }

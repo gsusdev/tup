@@ -4,6 +4,7 @@
 #include "tup_frame_sender.h"
 
 #include <assert.h>
+#include <string.h>
 
 #include "tup_header.h"
 #include "tup_body.h"
@@ -40,6 +41,7 @@ tup_frameSender_error_t tup_frameSender_init(tup_frameSender_t* descriptor_p, co
     assert(initStruct_p != NULL);
 
     descriptor_t* descr_p = (descriptor_t*)descriptor_p;
+    memset(descr_p, 0, sizeof(*descr_p));
 
     descr_p->sendPos = 0;
     descr_p->fullBodySize_bytes = 0;

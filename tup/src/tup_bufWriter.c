@@ -8,7 +8,7 @@
 
 #include "tup_endianness.h"
 
-typedef struct
+typedef struct descriptor_t
 {
 	void* buf_p;
     void* cur_p;
@@ -44,6 +44,7 @@ bool tup_bufWriter_init(tup_bufWriter_t* descriptor_p, void* buf_p, size_t maxSi
     }
 
     descriptor_t* descr_p = (descriptor_t*)descriptor_p;
+    memset(descr_p, 0, sizeof(*descr_p));
 
     descr_p->buf_p = buf_p;
     descr_p->cur_p = buf_p;

@@ -1,5 +1,4 @@
-#ifndef INSTANCE_FORM_H
-#define INSTANCE_FORM_H
+#pragma once
 
 #include <QMainWindow>
 #include <QComboBox>
@@ -7,6 +6,7 @@
 
 #include "coder_widget.h"
 #include "transfer_widget.h"
+#include "instance_widget.h"
 
 namespace Ui {
 class InstanceForm;
@@ -33,8 +33,7 @@ private:
 
     CoderWidget* _coder_p = nullptr;
     TransferWidget* _transfer_p = nullptr;
+    InstanceWidget* _instance_p = nullptr;
 
     QSerialPort _port;
 };
-
-#endif // INSTANCE_FORM_H

@@ -140,7 +140,7 @@ static void signalFireHandler(uintptr_t signal, uintptr_t callbackValue)
     invoker.notify();
 }
 
-static bool signalWaitHandler(uintptr_t signal, uint32_t timeout_ms, uintptr_t callbackValue)
+static bool signalWait_Handler(uintptr_t signal, uint32_t timeout_ms, uintptr_t callbackValue)
 {
     (void)signal;
 
@@ -153,11 +153,6 @@ static bool signalWaitHandler(uintptr_t signal, uint32_t timeout_ms, uintptr_t c
 TupTransfer::TupTransfer(QObject *parent) : QObject(parent)
 {
     _sigOnvoker_p = new SignalsInvoker(*this);
-
-    tup_port_setLinkTransmitHandler(linkTransmitHandler);
-    tup_port_setSignalFireHandler(signalFireHandler);
-    tup_port_setSignalWaitHandler(signalWaitHandler);
-    tup_port_setGetCurrentTimeHandler(getCurrentTimeHandler);
 
     connect(this, SIGNAL(sigTransmit(QByteArray)), this, SLOT(slotTransmit(QByteArray)), Qt::QueuedConnection);
     _workBuffer.resize(2048);
@@ -245,11 +240,6 @@ void TupTransfer::portBytesWritten(qint64 bytes)
     tup_transfer_transmitted(&_transfer, bytes);
 }
 
-void TupTransfer::process()
-{
-    tup_transfer_run(&_transfer);
-}
-
 void TupTransfer::slotTransmit(QByteArray data)
 {
     const auto sz = _port_p->write(data);
@@ -274,9 +264,10 @@ bool TupTransfer::init()
     initStruct.onFail = onFailHandler;
     initStruct.onCompleted = onCompletedHandler;
     initStruct.onInvalidFrame = onBadFrameHandler;
-    initStruct.retryCount = 2;
+    initStruct.tryCount = 2;
     initStruct.workBuffer_p = _workBuffer.data();
     initStruct.workBufferSize_bytes = _workBuffer.size();
+    initStruct.rxBufSize_bytes = _workBuffer.size() / 2;
     initStruct.retryPause_ms = 4000;
     initStruct.synTimeout_ms = 2000;
     initStruct.dataTimeout_ms = 2000;
@@ -286,12 +277,19 @@ bool TupTransfer::init()
     initStruct.signalFuncsCallback = reinterpret_cast<uintptr_t>(_sigOnvoker_p);
     initStruct.name = _name.data();
 
-    const auto result = tup_transfer_init(&_transfer, &initStruct) == tup_transfer_error_ok;
+    auto result = tup_transfer_init(&_transfer, &initStruct) == tup_transfer_error_ok;
+    result &= tup_transfer_listen(&_transfer) == tup_transfer_error_ok;
+
     return result;
 }
 
 void TupTransfer::run()
 {
+    tup_port_setLinkTransmitHandler(linkTransmitHandler);
+    tup_port_setSignalFireHandler(signalFireHandler);
+    tup_port_setSignalWaitHandler(signalWait_Handler);
+    tup_port_setGetCurrentTimeHandler(getCurrentTimeHandler);
+
     auto thread_p = new TransferThread();
 
     thread_p->setFunction(tup_transfer_run, &_transfer);

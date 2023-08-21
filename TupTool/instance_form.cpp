@@ -21,8 +21,11 @@ InstanceForm::InstanceForm(QWidget *parent) :
 
     _coder_p = new CoderWidget(ui->tabCoder);
     _transfer_p = new TransferWidget(ui->tabTransfer);
+    _instance_p = new InstanceWidget(ui->tabInstance);
 
-    _coder_p->setPort(&_port);
+    ui->tabWidget->setCurrentIndex(2);
+
+    _instance_p->setPort(&_port);
 }
 
 InstanceForm::~InstanceForm()
@@ -73,13 +76,24 @@ void InstanceForm::tabWidgetCurrentChanged(int index)
     if (widget_p == ui->tabCoder)
     {
         _transfer_p->setPort(nullptr);
+        _instance_p->setPort(nullptr);
+
         _coder_p->setPort(&_port);
     }
     else if (widget_p == ui->tabTransfer)
     {
         _coder_p->setPort(nullptr);
+        _instance_p->setPort(nullptr);
+
         _transfer_p->setName(ui->cbPortName->currentText());
         _transfer_p->setPort(&_port);
+    }
+    else if (widget_p == ui->tabInstance)
+    {
+        _coder_p->setPort(nullptr);
+        _transfer_p->setPort(nullptr);
+
+        _instance_p->setPort(&_port);
     }
 }
 

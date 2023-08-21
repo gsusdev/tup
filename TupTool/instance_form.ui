@@ -120,6 +120,11 @@
         <string>Transfer</string>
        </attribute>
       </widget>
+      <widget class="QWidget" name="tabInstance">
+       <attribute name="title">
+        <string>Instance</string>
+       </attribute>
+      </widget>
      </widget>
     </item>
    </layout>

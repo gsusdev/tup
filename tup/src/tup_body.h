@@ -17,5 +17,5 @@ tup_body_error_t tup_body_check(tup_version_t protocolVersion, const void volati
 tup_body_error_t tup_body_sign(tup_version_t protocolVersion, void volatile* buf_p, size_t fullSize_bytes);
 
 #if defined(__cplusplus)
-} // extern "c"
+} // extern "C"
 #endif
