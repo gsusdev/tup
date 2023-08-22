@@ -19,6 +19,7 @@ InstanceWidget::InstanceWidget(QWidget *parent) :
     connect(ui->butAccept, &QPushButton::clicked, this, &InstanceWidget::butAcceptClicked);
     connect(ui->butSendFin, &QPushButton::clicked, this, &InstanceWidget::butSendFinClicked);
     connect(ui->butSendData, &QPushButton::clicked, this, &InstanceWidget::butSendDataClicked);
+    connect(ui->butSetResult, &QPushButton::clicked, this, &InstanceWidget::butSetResultClicked);
     connect(ui->butClear, &QPushButton::clicked, this, &InstanceWidget::butClearClicked);
 
     connect(&_instance, &TupInstance::onConnect, this, &InstanceWidget::onConnect);
@@ -129,7 +130,9 @@ void InstanceWidget::onReceiveData(QByteArray data, quint8 isFinal)
     const auto text = QString::fromUtf8(data);
     const QString final = isFinal ? "(fin)" : "";
 
-    ui->teLog->append(QString("Received %1: %2 bytes").arg(final).arg(text));
+    ui->teLog->append(QString("Received %1 bytes %2: [").arg(data.size()).arg(final));
+    ui->teLog->append(text);
+    ui->teLog->append("]");
 }
 
 void InstanceWidget::onFail(quint32 failCode)

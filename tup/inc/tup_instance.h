@@ -41,11 +41,12 @@ typedef struct tup_initStruct_t
     uintptr_t txCallbackValue;
     uintptr_t signal;
     uintptr_t signalFuncsCallback;
+    const char* name;
 } tup_initStruct_t;
 
 typedef struct tup_instance_t
 {
-    uint8_t privateData[304];
+    uint8_t privateData[308];
 } tup_instance_t;
 
 #if defined(__cplusplus)

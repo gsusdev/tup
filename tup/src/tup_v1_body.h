@@ -49,6 +49,8 @@ extern "C" {
 #endif
 
 size_t tup_v1_body_getMinSize();
+size_t tup_v1_body_getEmptyDataBodySize();
+
 tup_body_error_t tup_v1_body_getSizeWithCrc_bytes(size_t bodyWoCrcSize_bytes, size_t* fullSize_out_p);
 tup_body_error_t tup_v1_body_getSizeWoCrc_bytes(size_t fullSize_bytes, size_t* bodyWoCrcSize_bytes_out_p);
 tup_body_error_t tup_v1_body_getType(const void volatile* buf_p, size_t fullSize_bytes, tup_v1_cop_t* type_out_p);

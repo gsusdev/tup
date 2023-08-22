@@ -11,6 +11,8 @@ static tup_port_logHandler_t logHandler = NULL;
 static tup_port_signalFireHandler_t signalFireHandler = NULL;
 static tup_port_signalWaitHandler_t signalWaitHandler = NULL;
 
+static tup_log_severity_t maxLogSeverity = tup_log_debug;
+
 void tup_port_setSignalFireHandler(tup_port_signalFireHandler_t handler)
 {
     signalFireHandler = handler;
@@ -56,12 +58,37 @@ uint32_t tup_getCurrentTime_ms()
     return result;
 }
 
-void tup_log(const char* text)
+void tup_log_setMaxLevel(tup_log_severity_t severity)
 {
-    if (logHandler != NULL)
+    maxLogSeverity = severity;
+}
+
+void tup_log(const char* text, tup_log_severity_t severity)
+{
+    if ((logHandler != NULL) || (severity <= maxLogSeverity))
     {
         logHandler(text);
     }
+}
+
+void tup_logError(const char* text)
+{
+    tup_log(text, tup_log_error);
+}
+
+void tup_logInfo(const char* text)
+{
+    tup_log(text, tup_log_info);
+}
+
+void tup_logDebug(const char* text)
+{
+    tup_log(text, tup_log_debug);
+}
+
+void tup_logTrace(const char* text)
+{
+    tup_log(text, tup_log_trace);
 }
 
 void tup_signal_fire(uintptr_t signal, uintptr_t callbackValue)

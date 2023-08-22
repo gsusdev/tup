@@ -7,6 +7,7 @@
 #include <stdatomic.h>
 
 #include "tup_v1_transfer.h"
+#include "tup_platform.h"
 
 typedef enum
 {
@@ -44,6 +45,7 @@ typedef struct descriptor_t
     size_t totalSentSize;
     size_t lastSentSize;
     uint32_t receivedJ;
+    const char* name;
 } descriptor_t;
 
 static_assert(sizeof(descriptor_t) <= sizeof(tup_instance_t), "Adjust the \"privateData\" field size in the \"tup_instance_t\" struct");
@@ -68,6 +70,14 @@ static void onFailHandler(tup_transfer_fail_t failCode, uintptr_t tag);
 static void onAckSentHandler(uintptr_t tag);
 static bool checkDescr(const descriptor_t* descr_p);
 static bool sendNextDataChunk(descriptor_t* descr_p);
+
+static void log(const descriptor_t* descr_p, const char* text, tup_log_severity_t severity);
+
+#define INFO(text) log(descr_p, text, tup_log_info)
+#define ERROR(text) log(descr_p, text, tup_log_error)
+#define DEBUG(text) log(descr_p, text, tup_log_info)
+#define TRACE(text) log(descr_p, text, tup_log_trace)
+
 
 tup_error_t tup_init(tup_instance_t* instance_p, const tup_initStruct_t* initStruct_p)
 {
@@ -94,6 +104,7 @@ tup_error_t tup_init(tup_instance_t* instance_p, const tup_initStruct_t* initStr
     descriptor_t* descr_p = (descriptor_t*)instance_p;
     memset(descr_p, 0, sizeof(*descr_p));
 
+    descr_p->name = initStruct_p->name;
     descr_p->isMaster = initStruct_p->isMaster;
     descr_p->onConnect = initStruct_p->onConnect;
     descr_p->onDisconnectRequest = initStruct_p->onDisconnectRequest;
@@ -126,6 +137,7 @@ tup_error_t tup_init(tup_instance_t* instance_p, const tup_initStruct_t* initStr
     transferInit.txCallbackValue = initStruct_p->txCallbackValue;
     transferInit.signal = initStruct_p->signal;
     transferInit.signalFuncsCallback = initStruct_p->signalFuncsCallback;
+    transferInit.name = initStruct_p->name;
 
     const tup_transfer_error_t transferErr = tup_transfer_init(&descr_p->transfer, &transferInit);
     if (transferErr == tup_transfer_error_invalidInit)
@@ -176,7 +188,7 @@ tup_error_t tup_accept(tup_instance_t *instance_p)
 {
     DESCR(instance_p);
 
-    if (!descr_p->isMaster)
+    if (descr_p->isMaster)
     {
         return tup_error_invalidOperation;
     }
@@ -343,22 +355,44 @@ void tup_transmitted(tup_instance_t* instance_p, size_t size_bytes)
     }
 }
 
+static size_t getMaxDataPayloadSize(descriptor_t* descr_p)
+{
+    size_t limitByOurBuf;
+    tup_transfer_error_t err = tup_transfer_getMaxDataPayloadSize(&descr_p->transfer, &limitByOurBuf);
+    if (err != tup_transfer_error_ok)
+    {
+        return 0;
+    }
+
+    const size_t emptyFrameSize = tup_transfer_getEmptyDataFrameSize();
+    if (emptyFrameSize >= descr_p->partnerWindowSize)
+    {
+        return 0;
+    }
+
+    const size_t limitByPartnerBuf = descr_p->partnerWindowSize - emptyFrameSize;
+
+    const size_t result = ((limitByOurBuf < limitByPartnerBuf) ? limitByOurBuf : limitByPartnerBuf);
+
+    return result;
+}
+
 static bool sendNextDataChunk(descriptor_t* descr_p)
 {
     assert(descr_p->totalSentSize <= descr_p->sendingSize);
 
+    const size_t maxPayloadSize = getMaxDataPayloadSize(descr_p);
     size_t sizeToSend = descr_p->sendingSize - descr_p->totalSentSize;
-    const void* dataToSend_p = (const void*)((uintptr_t)descr_p->sendBuf_p + descr_p->totalSentSize);
 
     bool isFinal = true;
 
-    if (sizeToSend > descr_p->partnerWindowSize)
+    if (sizeToSend > maxPayloadSize)
     {
-        sizeToSend = descr_p->partnerWindowSize;
+        sizeToSend = maxPayloadSize;
         isFinal = false;
     }
 
-    descr_p->lastSentSize = sizeToSend;
+    const void* dataToSend_p = (const void*)((uintptr_t)descr_p->sendBuf_p + descr_p->totalSentSize);
 
     const tup_transfer_error_t err = tup_transfer_sendData(&descr_p->transfer, dataToSend_p, sizeToSend, isFinal);
     if (err != tup_transfer_error_ok)
@@ -366,6 +400,7 @@ static bool sendNextDataChunk(descriptor_t* descr_p)
         return false;
     }
 
+    descr_p->lastSentSize = sizeToSend;
     descr_p->isSendingData = true;
     descr_p->state = state_waitDataAck;
 
@@ -508,6 +543,8 @@ static void onFailHandler(tup_transfer_fail_t failCode, uintptr_t tag)
     descriptor_t* descr_p = (descriptor_t*)tag;
 
     descr_p->state = state_idle;
+    tup_transfer_reset(&descr_p->transfer);
+
     if (descr_p->onFail != NULL)
     {
         descr_p->onFail(failCode, descr_p->userCallbackValue);
@@ -543,6 +580,22 @@ static void onAckSentHandler(uintptr_t tag)
             }
             break;
     }
+}
+
+static void log(const descriptor_t* descr_p, const char* text, tup_log_severity_t severity)
+{
+    if (descr_p->name != NULL)
+    {
+        tup_log(descr_p->name, severity);
+        tup_log(".Instance: ", severity);
+    }
+    else
+    {
+        tup_log("Instance: ", severity);
+    }
+
+    tup_log(text, severity);
+    tup_log("\n", severity);
 }
 
 static bool checkDescr(const descriptor_t* descr_p)

@@ -21,9 +21,20 @@ size_t tup_v1_body_getMinSize()
     const size_t isFinalSize = sizeof(uint8_t);
     const size_t crcSize = sizeof(uint32_t);
 
-    size_t size = jSize + copSize + errorOrWinSizeSize + crcSize;
+    const size_t size = jSize + copSize + errorOrWinSizeSize + crcSize;
     assert(errorOrWinSizeSize >= isFinalSize);
 
+    return size;
+}
+
+size_t tup_v1_body_getEmptyDataBodySize()
+{
+    const size_t jSize = sizeof(uint32_t);
+    const size_t copSize = sizeof(uint8_t);
+    const size_t isFinalSize = sizeof(uint8_t);
+    const size_t crcSize = sizeof(uint32_t);
+
+    const size_t size = jSize + copSize + isFinalSize + crcSize;
     return size;
 }
 

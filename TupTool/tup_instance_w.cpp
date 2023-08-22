@@ -182,6 +182,12 @@ void TupInstance::setPort(QIODevice *port_p)
     }
 }
 
+void TupInstance::setName(const QString& value)
+{
+    _name = value.toLatin1();
+    _name.append('\0');
+}
+
 bool TupInstance::run()
 {
     tup_port_setLinkTransmitHandler(linkTransmitHandler);
@@ -205,6 +211,7 @@ bool TupInstance::run()
     _initStruct.userCallbackValue = invoker;
     _initStruct.txCallbackValue = invoker;
     _initStruct.signal = 1;
+    _initStruct.name = _name.data();
 
     const auto err = tup_init(&_instance, &_initStruct);
     if (err != tup_error_ok)

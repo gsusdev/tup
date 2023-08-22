@@ -18,6 +18,7 @@ public:
     ~InstanceWidget();
 
     void setPort(QIODevice* port_p) { _instance.setPort(port_p); }
+    void setName(const QString& value) { _instance.setName(value); }
 
 private slots:
     void butRunClicked(bool checked);

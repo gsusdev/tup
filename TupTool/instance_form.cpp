@@ -51,7 +51,8 @@ void InstanceForm::butOpenCloseClicked(bool checked)
     }
     else
     {
-        _port.setPortName(ui->cbPortName->currentText());
+        const auto& portName = ui->cbPortName->currentText();
+        _port.setPortName(portName);
         _port.setParity(QSerialPort::Parity::NoParity);
         _port.setDataBits(QSerialPort::DataBits::Data8);
         _port.setStopBits(QSerialPort::StopBits::OneStop);
@@ -60,6 +61,9 @@ void InstanceForm::butOpenCloseClicked(bool checked)
         if (_port.open(QSerialPort::ReadWrite))
         {
             ui->butOpenClose->setText("Close");
+
+            _instance_p->setName(portName);
+            _transfer_p->setName(portName);
         }
         else
         {
@@ -85,7 +89,6 @@ void InstanceForm::tabWidgetCurrentChanged(int index)
         _coder_p->setPort(nullptr);
         _instance_p->setPort(nullptr);
 
-        _transfer_p->setName(ui->cbPortName->currentText());
         _transfer_p->setPort(&_port);
     }
     else if (widget_p == ui->tabInstance)

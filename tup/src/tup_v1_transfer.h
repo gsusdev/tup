@@ -67,6 +67,7 @@ extern "C" {
 #endif
 
 tup_transfer_error_t tup_transfer_init(tup_transfer_t* descriptor_p, const tup_transfer_initStruct_t* init_p);
+tup_transfer_error_t tup_transfer_reset(tup_transfer_t* descriptor_p);
 tup_transfer_error_t tup_transfer_listen(tup_transfer_t* descriptor_p);
 
 tup_transfer_error_t tup_transfer_handle(tup_transfer_t* descriptor_p);
@@ -77,6 +78,8 @@ tup_transfer_error_t tup_transfer_stop(tup_transfer_t* descriptor_p);
 tup_transfer_error_t tup_transfer_sendSyn(tup_transfer_t* descriptor_p, uint32_t j);
 tup_transfer_error_t tup_transfer_sendFin(tup_transfer_t* descriptor_p);
 tup_transfer_error_t tup_transfer_sendData(tup_transfer_t* descriptor_p, const void* payload_p, size_t payloadSize_bytes, bool isFinal);
+tup_transfer_error_t tup_transfer_getMaxDataPayloadSize(tup_transfer_t* descriptor_p, size_t* maxSize_bytes_out_p);
+size_t tup_transfer_getEmptyDataFrameSize();
 
 tup_transfer_error_t tup_transfer_setResult(tup_transfer_t* descriptor_p, tup_transfer_result_t transferResult);
 

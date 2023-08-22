@@ -21,6 +21,8 @@ public:
     ~TupInstance();
 
     void setPort(QIODevice* port_p);
+    void setName(const QString& value);
+
     void setSynTimeout_ms(quint32 value) { _initStruct.synTimeout_ms = value; }
     void setDataTimeout_ms(quint32 value) { _initStruct.dataTimeout_ms = value; }
     void setTryCount(quint32 value) { _initStruct.tryCount = value; }
@@ -79,4 +81,6 @@ private:
     tup_instance_t _instance;
     tup_initStruct_t _initStruct;
     QByteArray _workBuf;
+
+    QByteArray _name;
 };
