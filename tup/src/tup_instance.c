@@ -34,6 +34,7 @@ typedef struct descriptor_t
     tup_onDisconnectRequest_t onDisconnectRequest;
     tup_onReceiveData_t onReceiveData;
     tup_onSendDataProgress_t onSendDataProgress;
+    tup_onSendResult_t onSendResult;
     tup_onFail_t onFail;
     uintptr_t userCallbackValue;
     tup_transfer_t transfer;
@@ -318,7 +319,7 @@ tup_error_t tup_setResult(tup_instance_t* instance_p, tup_transfer_result_t resu
         return tup_error_internal;
     }
 
-    descr_p->state = state_ready;
+    descr_p->state = state_waitDataAckSent;
     return tup_error_ok;
 }
 
@@ -579,6 +580,14 @@ static void onAckSentHandler(uintptr_t tag)
                 descr_p->onDisconnectRequest(descr_p->userCallbackValue);
             }
             break;
+
+        case state_waitDataAckSent:
+        	descr_p->state = state_ready;
+        	if (descr_p->onSendResult != NULL)
+        	{
+        		descr_p->onSendResult(descr_p->userCallbackValue);
+        	}
+        	break;
     }
 }
 

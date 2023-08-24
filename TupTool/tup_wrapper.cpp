@@ -1,4 +1,4 @@
-#include "tup_instance_w.h"
+#include "tup_wrapper.h"
 
 #include <QDateTime>
 #include <QDebug>
@@ -8,7 +8,7 @@
 class InstanceSignalsInvoker
 {
 public:
-    InstanceSignalsInvoker(TupInstance& owner) :
+    InstanceSignalsInvoker(TupWrapper& owner) :
         _owner(owner)
     {}
 
@@ -53,10 +53,10 @@ public:
     }
 
 private:
-    TupInstance& _owner;
+    TupWrapper& _owner;
 };
 
-class TupInstance::InstanceThread : public QThread
+class TupWrapper::InstanceThread : public QThread
 {
 public:
     using func_t = tup_error_t(*)(tup_instance_t* instance_p);
@@ -139,7 +139,7 @@ static bool signalWaitHandler(uintptr_t signal, uint32_t timeout_ms, uintptr_t c
     return result;
 }
 
-TupInstance::TupInstance(QObject *parent)
+TupWrapper::TupWrapper(QObject *parent)
     : QObject{parent}
 {
     _sigInvoker_p = new InstanceSignalsInvoker(*this);
@@ -153,42 +153,42 @@ TupInstance::TupInstance(QObject *parent)
     _initStruct.rxBufSize_bytes = 1024;
 }
 
-TupInstance::~TupInstance()
+TupWrapper::~TupWrapper()
 {
     stop();
     delete static_cast<InstanceSignalsInvoker*>(_sigInvoker_p);
 }
 
-void TupInstance::setPort(QIODevice *port_p)
+void TupWrapper::setPort(QIODevice *port_p)
 {
     if (_port_p != nullptr)
     {
         stop();
 
-        disconnect(_port_p, &QObject::destroyed, this, &TupInstance::portDestroyed);
-        disconnect(_port_p, &QIODevice::readyRead, this, &TupInstance::portReadyRead);
-        disconnect(_port_p, &QIODevice::aboutToClose, this, &TupInstance::portAboutToClose);
-        disconnect(_port_p, &QIODevice::bytesWritten, this, &TupInstance::portBytesWritten);
+        disconnect(_port_p, &QObject::destroyed, this, &TupWrapper::portDestroyed);
+        disconnect(_port_p, &QIODevice::readyRead, this, &TupWrapper::portReadyRead);
+        disconnect(_port_p, &QIODevice::aboutToClose, this, &TupWrapper::portAboutToClose);
+        disconnect(_port_p, &QIODevice::bytesWritten, this, &TupWrapper::portBytesWritten);
     }
 
     _port_p = port_p;
 
     if (_port_p != nullptr)
     {
-        connect(_port_p, &QObject::destroyed, this, &TupInstance::portDestroyed);
-        connect(_port_p, &QIODevice::readyRead, this, &TupInstance::portReadyRead);
-        connect(_port_p, &QIODevice::aboutToClose, this, &TupInstance::portAboutToClose);
-        connect(_port_p, &QIODevice::bytesWritten, this, &TupInstance::portBytesWritten);
+        connect(_port_p, &QObject::destroyed, this, &TupWrapper::portDestroyed);
+        connect(_port_p, &QIODevice::readyRead, this, &TupWrapper::portReadyRead);
+        connect(_port_p, &QIODevice::aboutToClose, this, &TupWrapper::portAboutToClose);
+        connect(_port_p, &QIODevice::bytesWritten, this, &TupWrapper::portBytesWritten);
     }
 }
 
-void TupInstance::setName(const QString& value)
+void TupWrapper::setName(const QString& value)
 {
     _name = value.toLatin1();
     _name.append('\0');
 }
 
-bool TupInstance::run()
+bool TupWrapper::run()
 {
     tup_port_setLinkTransmitHandler(linkTransmitHandler);
     tup_port_setSignalFireHandler(signalFireHandler);
@@ -228,7 +228,7 @@ bool TupInstance::run()
     return true;
 }
 
-void TupInstance::stop()
+void TupWrapper::stop()
 {
     if (_thread_p == nullptr)
     {
@@ -245,38 +245,38 @@ void TupInstance::stop()
     }
 }
 
-bool TupInstance::tupConnect()
+bool TupWrapper::tupConnect()
 {
     const auto err = tup_connect(&_instance);
     return err == tup_error_ok;
 }
 
-bool TupInstance::tupAccept()
+bool TupWrapper::tupAccept()
 {
     const auto err = tup_accept(&_instance);
     return err == tup_error_ok;
 }
 
-bool TupInstance::sendFin()
+bool TupWrapper::sendFin()
 {
     const auto err = tup_sendFin(&_instance);
     return err == tup_error_ok;
 }
 
-bool TupInstance::sendData(QByteArray data)
+bool TupWrapper::sendData(QByteArray data)
 {
     _sendingData = data;
     const auto err = tup_sendData(&_instance, _sendingData.data(), _sendingData.size());
     return err == tup_error_ok;
 }
 
-bool TupInstance::setResult(tup_transfer_result_t result)
+bool TupWrapper::setResult(tup_transfer_result_t result)
 {
     const auto err = tup_setResult(&_instance, result);
     return err == tup_error_ok;
 }
 
-void TupInstance::portDestroyed(QObject *obj)
+void TupWrapper::portDestroyed(QObject *obj)
 {
     (void)obj;
 
@@ -284,33 +284,33 @@ void TupInstance::portDestroyed(QObject *obj)
     _port_p = nullptr;
 }
 
-void TupInstance::portAboutToClose()
+void TupWrapper::portAboutToClose()
 {
     stop();
 }
 
-void TupInstance::portReadyRead()
+void TupWrapper::portReadyRead()
 {
     _receivedData = _port_p->readAll();
     tup_received(&_instance, _receivedData.data(), _receivedData.size());
 }
 
-void TupInstance::portBytesWritten(qint64 bytes)
+void TupWrapper::portBytesWritten(qint64 bytes)
 {
     tup_transmitted(&_instance, bytes);
 }
 
-void TupInstance::slotTransmit(QByteArray data)
+void TupWrapper::slotTransmit(QByteArray data)
 {
     _port_p->write(data);
 }
 
-void TupInstance::notify()
+void TupWrapper::notify()
 {
     _waitCond.notify_all();
 }
 
-bool TupInstance::wait(uint32_t timeout_ms)
+bool TupWrapper::wait(uint32_t timeout_ms)
 {
     _mutex.lock();
     const auto result = _waitCond.wait(&_mutex, timeout_ms);
@@ -319,33 +319,33 @@ bool TupInstance::wait(uint32_t timeout_ms)
     return result;
 }
 
-void TupInstance::transmit(const void *buf_p, size_t size_bytes)
+void TupWrapper::transmit(const void *buf_p, size_t size_bytes)
 {
     auto data = QByteArray::fromRawData(static_cast<const char*>(buf_p), size_bytes);
     QMetaObject::invokeMethod(this, "slotTransmit", Q_ARG(QByteArray, data));
 }
 
-void TupInstance::doOnConnect()
+void TupWrapper::doOnConnect()
 {
     emit onConnect();
 }
 
-void TupInstance::doOnDisconnectRequest()
+void TupWrapper::doOnDisconnectRequest()
 {
     emit onDisconnectRequest();
 }
 
-void TupInstance::doOnSendDataProgress(quintptr sentSize_bytes, quintptr totalSize_bytes)
+void TupWrapper::doOnSendDataProgress(quintptr sentSize_bytes, quintptr totalSize_bytes)
 {
     emit onSendDataProgress(sentSize_bytes, totalSize_bytes);
 }
 
-void TupInstance::doOnReceiveData(QByteArray data, quint8 isFinal)
+void TupWrapper::doOnReceiveData(QByteArray data, quint8 isFinal)
 {
     emit onReceiveData(data, isFinal);
 }
 
-void TupInstance::doOnFail(quint32 failCode)
+void TupWrapper::doOnFail(quint32 failCode)
 {
     emit onFail(failCode);
 }

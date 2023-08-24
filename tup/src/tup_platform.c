@@ -65,7 +65,7 @@ void tup_log_setMaxLevel(tup_log_severity_t severity)
 
 void tup_log(const char* text, tup_log_severity_t severity)
 {
-    if ((logHandler != NULL) || (severity <= maxLogSeverity))
+    if ((logHandler != NULL) && (severity <= maxLogSeverity))
     {
         logHandler(text);
     }

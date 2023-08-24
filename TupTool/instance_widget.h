@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "tup_instance_w.h"
+#include "tup_wrapper.h"
 
 namespace Ui {
 class InstanceWidget;
@@ -39,7 +39,7 @@ private slots:
 private:
     Ui::InstanceWidget *ui;
 
-    TupInstance _instance;
+    TupWrapper _instance;
 };
 
 #endif // INSTANCE_WIDGET_H

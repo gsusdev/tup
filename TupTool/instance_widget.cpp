@@ -22,11 +22,11 @@ InstanceWidget::InstanceWidget(QWidget *parent) :
     connect(ui->butSetResult, &QPushButton::clicked, this, &InstanceWidget::butSetResultClicked);
     connect(ui->butClear, &QPushButton::clicked, this, &InstanceWidget::butClearClicked);
 
-    connect(&_instance, &TupInstance::onConnect, this, &InstanceWidget::onConnect);
-    connect(&_instance, &TupInstance::onDisconnectRequest, this, &InstanceWidget::onDisconnectRequest);
-    connect(&_instance, &TupInstance::onSendDataProgress, this, &InstanceWidget::onSendDataProgress);
-    connect(&_instance, &TupInstance::onReceiveData, this, &InstanceWidget::onReceiveData);
-    connect(&_instance, &TupInstance::onFail, this, &InstanceWidget::onFail);
+    connect(&_instance, &TupWrapper::onConnect, this, &InstanceWidget::onConnect);
+    connect(&_instance, &TupWrapper::onDisconnectRequest, this, &InstanceWidget::onDisconnectRequest);
+    connect(&_instance, &TupWrapper::onSendDataProgress, this, &InstanceWidget::onSendDataProgress);
+    connect(&_instance, &TupWrapper::onReceiveData, this, &InstanceWidget::onReceiveData);
+    connect(&_instance, &TupWrapper::onFail, this, &InstanceWidget::onFail);
 }
 
 InstanceWidget::~InstanceWidget()

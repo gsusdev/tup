@@ -38,10 +38,10 @@ SOURCES += \
     mainwindow.cpp \
     syn_widget.cpp \
     transfer_widget.cpp \
-    tup_instance_w.cpp \
     tup_receiver.cpp \
     tup_sender.cpp \
     tup_transfer.cpp \
+    tup_wrapper.cpp \
     utils.cpp
 
 HEADERS += \
@@ -70,10 +70,10 @@ HEADERS += \
     mainwindow.h \
     syn_widget.h \
     transfer_widget.h \
-    tup_instance_w.h \
     tup_receiver.h \
     tup_sender.h \
     tup_transfer.h \
+    tup_wrapper.h \
     utils.h
 
 FORMS += \

@@ -12,13 +12,13 @@
 
 #include "tup_instance.h"
 
-class TupInstance : public QObject
+class TupWrapper : public QObject
 {
     Q_OBJECT
     friend class InstanceSignalsInvoker;
 public:
-    explicit TupInstance(QObject *parent = nullptr);
-    ~TupInstance();
+    explicit TupWrapper(QObject *parent = nullptr);
+    ~TupWrapper();
 
     void setPort(QIODevice* port_p);
     void setName(const QString& value);
