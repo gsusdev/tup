@@ -1,26 +1,24 @@
-#pragma once
+#ifndef SLAVEHANDLER_H
+#define SLAVEHANDLER_H
 
 #include <QObject>
-#include <QByteArray>
 
 #include "tup_wrapper.h"
 #include "app_protocol.h"
 
-class MasterHandler : public QObject
+class SlaveHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit MasterHandler(QObject *parent = nullptr);
+    explicit SlaveHandler(QObject *parent = nullptr);
 
     void setTup(TupWrapper* tup_p);
 
-    const app_protocol_slaveOutputData_t& slaveOutput() const { return _slaveOutput; }
-
     const app_protocol_masterOutputData_t& masterOutput() const { return _masterOutput; }
-    app_protocol_masterOutputData_t& masterOutput() { return _masterOutput; }
-    void setMasterOutput(const app_protocol_masterOutputData_t& values) { _masterOutput = values; }
 
-    void sendData();
+    const app_protocol_slaveOutputData_t& slaveOutput() const { return _slaveOutput; }
+    app_protocol_slaveOutputData_t& slaveOutput() { return _slaveOutput; }
+    void setSlaveOutput(const app_protocol_slaveOutputData_t& values) { _slaveOutput = values; }
 
 signals:
     void sigOnUpdated();
@@ -28,6 +26,7 @@ signals:
 
 private slots:
     void onReceiveData(QByteArray data, quint8 isFinal);
+    void onResultSent();
 
 private:
     TupWrapper* _tup_p = nullptr;
@@ -37,3 +36,5 @@ private:
 
     QByteArray _inputBuf;
 };
+
+#endif // SLAVEHANDLER_H

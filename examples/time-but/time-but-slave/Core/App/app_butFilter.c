@@ -95,9 +95,9 @@ butFilter_error_t butFilter_handle(butFilter_t* instance_p)
 			{
 				descr_p->keyUpEvent = true;
 			}
-		}
 
-		descr_p->isDown_stable = curIsDown;
+			descr_p->isDown_stable = curIsDown;
+		}
 	}
 
 	if (descr_p->eventHandler != NULL)

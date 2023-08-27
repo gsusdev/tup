@@ -4,6 +4,7 @@
 #include "tup_instance.h"
 
 #include <assert.h>
+#include <string.h>
 #include <stdatomic.h>
 
 #include "tup_v1_transfer.h"
@@ -28,8 +29,7 @@ typedef enum
 
 typedef struct descriptor_t
 {
-    _Atomic state_t state;
-    bool isMaster;
+    _Atomic state_t state;    
     tup_onConnect_t onConnect;
     tup_onDisconnectRequest_t onDisconnectRequest;
     tup_onReceiveData_t onReceiveData;
@@ -38,18 +38,19 @@ typedef struct descriptor_t
     tup_onFail_t onFail;
     uintptr_t userCallbackValue;
     tup_transfer_t transfer;
-    size_t partnerWindowSize;
-    bool isFinalized;
-    bool isSendingData;
+    size_t partnerWindowSize;    
     const void* sendBuf_p;
     size_t sendingSize;
     size_t totalSentSize;
     size_t lastSentSize;
     uint32_t receivedJ;
     const char* name;
+    bool isMaster;
+    bool isFinalized;
+    bool isSendingData;
 } descriptor_t;
 
-static_assert(sizeof(descriptor_t) <= sizeof(tup_instance_t), "Adjust the \"privateData\" field size in the \"tup_instance_t\" struct");
+STRUCT_ASSERT(tup_instance_t, descriptor_t);
 
 #define _DESCR(d, qual)                                 \
     assert(d != NULL);                                  \
@@ -110,6 +111,7 @@ tup_error_t tup_init(tup_instance_t* instance_p, const tup_initStruct_t* initStr
     descr_p->onConnect = initStruct_p->onConnect;
     descr_p->onDisconnectRequest = initStruct_p->onDisconnectRequest;
     descr_p->onSendDataProgress = initStruct_p->onSendDataProgress;
+    descr_p->onSendResult = initStruct_p->onSendResult;
     descr_p->onReceiveData = initStruct_p->onReceiveData;
     descr_p->onFail = initStruct_p->onFail;
     descr_p->userCallbackValue = initStruct_p->userCallbackValue;

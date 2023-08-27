@@ -1,4 +1,4 @@
-#include "tup_wrapper.h"
+#include "tup_instance_w.h"
 
 #include <QDateTime>
 #include <QDebug>
@@ -25,11 +25,6 @@ public:
     void doOnSendDataProgress(quintptr sentSize_bytes, quintptr totalSize_bytes)
     {
         _owner.doOnSendDataProgress(sentSize_bytes, totalSize_bytes);
-    }
-
-    void doOnResultSent()
-    {
-        _owner.doOnResultSent();
     }
 
     void doOnReceiveData(QByteArray data, quint8 isFinal)
@@ -98,12 +93,6 @@ static void onSendDataProgressHandler(size_t sentSize_bytes, size_t totalSize_by
 {
     auto& invoker = *reinterpret_cast<InstanceSignalsInvoker*>(callbackValue);
     invoker.doOnSendDataProgress(sentSize_bytes, totalSize_bytes);
-}
-
-static void onResultSentHandler(uintptr_t callbackValue)
-{
-    auto& invoker = *reinterpret_cast<InstanceSignalsInvoker*>(callbackValue);
-    invoker.doOnResultSent();
 }
 
 static void onReceiveDataHandler(const void volatile* buf_p, size_t size_bytes, bool isFinal, uintptr_t callbackValue)
@@ -199,18 +188,12 @@ void TupWrapper::setName(const QString& value)
     _name.append('\0');
 }
 
-static void tupPortLogHandler(const char* text)
-{
-    qDebug() << QString(text);
-}
-
 bool TupWrapper::run()
 {
     tup_port_setLinkTransmitHandler(linkTransmitHandler);
     tup_port_setSignalFireHandler(signalFireHandler);
     tup_port_setSignalWaitHandler(signalWaitHandler);
     tup_port_setGetCurrentTimeHandler(getCurrentTimeHandler);
-    tup_port_setLogHandler(tupPortLogHandler);
 
     _workBuf.resize(_initStruct.rxBufSize_bytes * 2);
 
@@ -219,7 +202,6 @@ bool TupWrapper::run()
     _initStruct.onFail = onFailHandler;
     _initStruct.onReceiveData = onReceiveDataHandler;
     _initStruct.onSendDataProgress = onSendDataProgressHandler;
-    _initStruct.onSendResult = onResultSentHandler;
 
     _initStruct.workBuffer_p = _workBuf.data();
     _initStruct.workBufferSize_bytes = _workBuf.size();
@@ -248,8 +230,6 @@ bool TupWrapper::run()
 
 void TupWrapper::stop()
 {
-    _isConnected = false;
-
     if (_thread_p == nullptr)
     {
         return;
@@ -267,16 +247,12 @@ void TupWrapper::stop()
 
 bool TupWrapper::tupConnect()
 {
-    _isConnected = false;
-
     const auto err = tup_connect(&_instance);
     return err == tup_error_ok;
 }
 
 bool TupWrapper::tupAccept()
 {
-    _isConnected = false;
-
     const auto err = tup_accept(&_instance);
     return err == tup_error_ok;
 }
@@ -351,7 +327,6 @@ void TupWrapper::transmit(const void *buf_p, size_t size_bytes)
 
 void TupWrapper::doOnConnect()
 {
-    _isConnected = true;
     emit onConnect();
 }
 
@@ -363,11 +338,6 @@ void TupWrapper::doOnDisconnectRequest()
 void TupWrapper::doOnSendDataProgress(quintptr sentSize_bytes, quintptr totalSize_bytes)
 {
     emit onSendDataProgress(sentSize_bytes, totalSize_bytes);
-}
-
-void TupWrapper::doOnResultSent()
-{
-    emit onResultSent();
 }
 
 void TupWrapper::doOnReceiveData(QByteArray data, quint8 isFinal)

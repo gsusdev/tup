@@ -22,6 +22,8 @@ SOURCES += \
     master_form.cpp \
     master_handler.cpp \
     port_widget.cpp \
+    slave_form.cpp \
+    slave_handler.cpp \
     tup_wrapper.cpp
 
 HEADERS += \
@@ -30,12 +32,15 @@ HEADERS += \
     master_form.h \
     master_handler.h \
     port_widget.h \
+    slave_form.h \
+    slave_handler.h \
     tup_wrapper.h
 
 FORMS += \
     mainwindow.ui \
     master_form.ui \
-    port_widget.ui
+    port_widget.ui \
+    slave_form.ui
 
 INCLUDEPATH += \
     ../../../tup/inc \

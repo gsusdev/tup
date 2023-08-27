@@ -4,9 +4,25 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "stm32f4xx_hal.h"
+
 typedef void (*app_hal_uartRxHandler_t)(const volatile void* buf_p, size_t size_bytes);
 typedef void (*app_hal_uartRxErrorHandler_t)(int error);
 typedef void (*app_hal_uartTxHandler_t)(size_t size_bytes);
+
+typedef struct {
+
+	volatile uint8_t dmaBuf[32];
+	volatile size_t lastBufPos;
+	UART_HandleTypeDef* instance_p;
+	app_hal_uartRxHandler_t rxHandler;
+	app_hal_uartRxErrorHandler_t rxErrorHandler;
+	app_hal_uartTxHandler_t txHandler;
+	volatile _Atomic size_t isBusy;
+	bool isInit;
+} __attribute__ ((aligned (8))) uart_t;
+
+extern uart_t uart;
 
 bool app_hal_uartInit(uint32_t baudrate, app_hal_uartRxHandler_t rxHandler, app_hal_uartRxErrorHandler_t rxErrorHandler, app_hal_uartTxHandler_t txHandler);
 bool app_hal_uartSend(const void* buf_p, size_t size_bytes);

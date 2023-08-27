@@ -12,10 +12,10 @@
 
 static struct
 {
+	tup_instance_t tup;
 	volatile _Atomic bool isSignalFired;
 	bool isUpdated;
 	bool isInit;
-	tup_instance_t tup;
 	uint32_t lastHandlingTime_ms;
 	app_protocol_masterOutputData_t* masterData_p;
 	const app_protocol_slaveOutputData_t* slaveData_p;
@@ -140,9 +140,16 @@ static bool initTup()
 	initStruct.workBufferSize_bytes = sizeof(link.tupWorkBuffer);
 	initStruct.onSendResult = onSendResultHandler;
 	initStruct.onReceiveData = onReceiveDataHandler;
+	initStruct.userCallbackValue = 1;
 	initStruct.signal = 1;
 
-	const tup_error_t err = tup_init(&link.tup, &initStruct);
+	tup_error_t err = tup_init(&link.tup, &initStruct);
+	if (err != tup_error_ok)
+	{
+		return false;
+	}
+
+	err = tup_accept(&link.tup);
 	if (err != tup_error_ok)
 	{
 		return false;

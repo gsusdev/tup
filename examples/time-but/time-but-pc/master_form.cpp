@@ -2,6 +2,7 @@
 #include "ui_master_form.h"
 
 #include <QDebug>
+#include <QTime>
 #include <QtEndian>
 
 #include "port_widget.h"
@@ -36,6 +37,8 @@ MasterForm::MasterForm(QWidget *parent) :
     connect(&_tup, &TupWrapper::onFail, this, &MasterForm::slotOnFail);
 
     connect(&_master, &MasterHandler::sigOnUpdated, this, &MasterForm::slotOnReceivedFromSlave);
+
+    connect(&_timer, &QTimer::timeout, this, &MasterForm::slotTimerTimeout);
 }
 
 MasterForm::~MasterForm()
@@ -75,11 +78,28 @@ void MasterForm::slotButSendClicked(bool checked)
 {
     (void)checked;
 
-    auto& masterOutput = _master.getMasterOutput();
+    auto& masterOutput = _master.masterOutput();    
 
-    masterOutput.hour = ui->sbOutHour->value();
-    masterOutput.minute = ui->sbOutMinute->value();
-    masterOutput.second = ui->sbOutSecond->value();
+    if (ui->rbTimeSystem->isChecked())
+    {
+        const auto time = QTime::currentTime();
+
+        masterOutput.hour = time.hour();
+        masterOutput.minute = time.minute();
+        masterOutput.second = time.second();
+    }
+    else if (ui->rbTimeManual->isChecked())
+    {
+        masterOutput.hour = ui->sbOutHour->value();
+        masterOutput.minute = ui->sbOutMinute->value();
+        masterOutput.second = ui->sbOutSecond->value();
+    }
+    else
+    {
+        masterOutput.hour = 24;
+        masterOutput.minute = 60;
+        masterOutput.second = 60;
+    }
 
     _master.sendData();
 }
@@ -141,7 +161,7 @@ void MasterForm::slotOnFail(quint32 failCode)
 
 void MasterForm::slotOnReceivedFromSlave()
 {
-    const auto& slaveOutput = _master.getSlaveOutput();
+    const auto& slaveOutput = _master.slaveOutput();
 
     ui->chkIsBigEndian->setChecked(slaveOutput.isBigEndian);
     ui->chkIsButDown->setChecked(slaveOutput.isButtonDown);
@@ -162,7 +182,7 @@ void MasterForm::slotOnReceivedFromSlave()
             val = qFromLittleEndian<quint32>(val);
         }
 
-        ui->leMcuId->setText(QString::number(val, 16));
+        ui->leMcuId->setText(QString::number(val, 10));
     }
     else
     {

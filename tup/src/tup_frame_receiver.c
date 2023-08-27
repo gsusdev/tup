@@ -21,9 +21,9 @@ typedef struct
     tup_version_t version;
     volatile _Atomic tup_frameReceiver_status_t status;
     bool isHeaderDecoded;
-} descriptor_t;
+} __attribute__ ((aligned (8))) descriptor_t;
 
-static_assert(sizeof(descriptor_t) <= sizeof(tup_frameReceiver_t), "Adjust the \"privateData\" field size in the \"tup_frameReceiver_t\" struct");
+STRUCT_ASSERT(tup_frameReceiver_t, descriptor_t);
 
 #define _DESCR(d, qual)                                 \
     assert(d != NULL);                                  \
@@ -89,20 +89,44 @@ tup_frameReceiver_error_t tup_frameReceiver_listen(tup_frameReceiver_t* descript
     DESCR(descriptor_p);
 
     tup_frameReceiver_status_t status = tup_frameReceiver_status_received;
-    bool mayListen = atomic_compare_exchange_strong(&descr_p->status, &status, tup_frameReceiver_status_receiving);
+    const bool isReceived = atomic_compare_exchange_strong(&descr_p->status, &status, tup_frameReceiver_status_receiving);
 
-    if (!mayListen)
+    if (!isReceived)
     {
         status = tup_frameReceiver_status_idle;
-        mayListen = atomic_compare_exchange_strong(&descr_p->status, &status, tup_frameReceiver_status_receiving);
-    }
+        if (!atomic_compare_exchange_strong(&descr_p->status, &status, tup_frameReceiver_status_receiving))
+        {
+            return tup_frameReceiver_error_invalidOperation;
+        }
 
-    if (!mayListen)
+        descr_p->curPos_p = descr_p->buffer_p;
+        descr_p->isHeaderDecoded = false;
+        descr_p->expectedSize_bytes = 0;
+        descr_p->fullBodySize_bytes = 0;
+        descr_p->fullFrameSize_bytes = 0;
+        descr_p->version = 0;
+    }
+    else
     {
-        return tup_frameReceiver_error_invalidOperation;
-    }
+        const size_t usedSize = usedBufSize(descr_p);
+        if (usedSize > descr_p->fullFrameSize_bytes)
+        {
+            const size_t extraSize = usedSize - descr_p->fullFrameSize_bytes;
+            const volatile void* extraStart_p = descr_p->buffer_p + descr_p->fullFrameSize_bytes;
+            memcpy(descr_p->buffer_p, extraStart_p, extraSize);
+            descr_p->curPos_p = descr_p->buffer_p + extraSize;
+        }
+        else
+        {
+            descr_p->curPos_p = descr_p->buffer_p;
+        }
 
-    descr_p->expectedSize_bytes = TUP_HEADER_SIZE_BYTES;
+        descr_p->isHeaderDecoded = false;
+        descr_p->expectedSize_bytes = 0;
+        descr_p->fullBodySize_bytes = 0;
+        descr_p->fullFrameSize_bytes = 0;
+        descr_p->version = 0;
+    }
 
     return tup_frameReceiver_error_ok;
 }
@@ -187,24 +211,6 @@ tup_frameReceiver_error_t tup_frameReceiver_getDirectBuffer(
 
     return tup_frameReceiver_error_ok;
 }
-
-/*tup_frameReceiver_error_t tup_frameReceiver_isHandlingNeeded(
-    tup_frameReceiver_t* descriptor_p, bool* result_out_p)
-{
-    CDESCR(descriptor_p);
-    assert(result_out_p != NULL);
-
-    if (descr_p->status == tup_frameReceiver_status_receiving)
-    {
-        *result_out_p = descr_p->isHandlingNeeded;
-    }
-    else
-    {
-        *result_out_p = false;
-    }
-
-    return tup_frameReceiver_error_ok;
-}*/
 
 tup_frameReceiver_error_t tup_frameReceiver_received(
     tup_frameReceiver_t* descriptor_p,

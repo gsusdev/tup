@@ -18,6 +18,7 @@ typedef struct
     volatile _Atomic tup_frameSender_status_t status;
 } descriptor_t;
 
+STRUCT_ASSERT(tup_frameSender_t, descriptor_t);
 static_assert(sizeof(descriptor_t) <= sizeof(tup_frameSender_t), "Adjust the \"privateData\" field size in the \"tup_frameSender_t\" struct");
 
 #define _DESCR(d, qual)                                 \

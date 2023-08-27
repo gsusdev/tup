@@ -81,7 +81,7 @@ typedef struct descriptor_t
     const char* name;
 } descriptor_t;
 
-static_assert(sizeof(descriptor_t) <= sizeof(tup_transfer_t), "Adjust the \"privateData\" field size in the \"tup_transfer_t\" struct");
+STRUCT_ASSERT(tup_transfer_t, descriptor_t);
 
 #define _DESCR(d, qual)                                 \
     assert(d != NULL);                                  \
@@ -801,7 +801,7 @@ static tup_transfer_error_t handleWaitAck(descriptor_t* descr_p)
                             descr_p->rxError = false;
                             descr_p->state = state_idle;
 
-                            tup_frameReceiver_reset(&descr_p->frameReceiver);
+                            //tup_frameReceiver_reset(&descr_p->frameReceiver);
                             const tup_frameReceiver_error_t recvErr = tup_frameReceiver_listen(&descr_p->frameReceiver);
                             if (recvErr != tup_frameReceiver_error_ok)
                             {

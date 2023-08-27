@@ -17,6 +17,7 @@ typedef struct descriptor_t
 } descriptor_t;
 
 static_assert(sizeof(descriptor_t) <= sizeof(tup_bufWriter_t), "Adjust the \"privateData\" field size in the \"tup_bufWriter_t\" struct");
+static_assert(_Alignof(descriptor_t) <= _Alignof(tup_bufWriter_t), "Adjust the alignment the \"tup_bufWriter_t\" struct");
 
 #define _DESCR(d, ret, qual)                            \
     assert(d != NULL);                                  \

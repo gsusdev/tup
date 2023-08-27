@@ -4,23 +4,20 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdatomic.h>
 
 #include "main.h"
 #include "stm32f4xx_hal.h"
+#include "usbd_cdc_if.h"
 
-static struct {
-	bool isInit;
-	UART_HandleTypeDef* instance_p;
-	app_hal_uartRxHandler_t rxHandler;
-	app_hal_uartRxErrorHandler_t rxErrorHandler;
-	app_hal_uartTxHandler_t txHandler;
-	volatile size_t lastSendSize;
-	volatile uint8_t dmaBuf[32];
-	volatile size_t lastBufPos;
-} uart = {0};
+uart_t uart = {0};
 
 extern RTC_HandleTypeDef hrtc;
 extern UART_HandleTypeDef huart2;
+
+volatile size_t receivedSize_bytes = 0;
+volatile size_t sentSize_bytes = 0;
+volatile size_t txBusyCount = 0;
 
 bool app_hal_uartInit(uint32_t baudrate, app_hal_uartRxHandler_t rxHandler, app_hal_uartRxErrorHandler_t rxErrorHandler, app_hal_uartTxHandler_t txHandler)
 {
@@ -62,10 +59,17 @@ bool app_hal_uartSend(const void* buf_p, size_t size_bytes)
 		return false;
 	}
 
+	size_t isBusy = false;
+	if (!atomic_compare_exchange_strong(&uart.isBusy, &isBusy, true))
+	{
+		++txBusyCount;
+		return false;
+	}
+
 	HAL_StatusTypeDef result = HAL_UART_Transmit_DMA(uart.instance_p, buf_p, size_bytes);
 	if (result != HAL_OK)
 	{
-		HAL_UART_DeInit(uart.instance_p);
+		uart.isBusy = false;
 		return false;
 	}
 
@@ -202,6 +206,9 @@ void app_hal_log(const char* text)
 
 }
 
+static uint16_t sendHistory[32] = {0};
+static size_t sendHistoryPos;
+
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if (!uart.isInit)
@@ -211,8 +218,10 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 
 	if ((huart == uart.instance_p) && (uart.txHandler != NULL))
 	{
-		uart.txHandler(uart.lastSendSize);
-		uart.lastSendSize = 0;
+		uart.isBusy = false;
+		sendHistory[sendHistoryPos++] = uart.instance_p->TxXferSize;
+		sentSize_bytes += uart.instance_p->TxXferSize;
+		uart.txHandler(uart.instance_p->TxXferSize);
 	}
 }
 
@@ -234,6 +243,10 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 
 			const volatile void* newDataStart_p = (const volatile void*)((uintptr_t)uart.dmaBuf + uart.lastBufPos);
 			const size_t newDataSize = Size - uart.lastBufPos;
+
+			uart.lastBufPos = Size;
+
+			receivedSize_bytes += newDataSize;
 
 			if (newDataSize > 0)
 			{

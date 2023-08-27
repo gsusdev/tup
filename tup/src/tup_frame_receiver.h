@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "tup_types.h"
+#include "tup_utils.h"
 
 typedef enum tup_frameReceiver_error_t
 {	  
@@ -28,14 +29,11 @@ typedef enum
 
 typedef struct
 {
-    uint8_t privateData[72];
-} tup_frameReceiver_t;
-
-typedef struct
-{
     volatile void* inputBuffer_p;
     size_t bufferSize_bytes;	
 } tup_frameReceiver_initStruct_t;
+
+PDESCR(tup_frameReceiver_t, 72, 8);
 
 #if defined(__cplusplus)
 extern "C" {

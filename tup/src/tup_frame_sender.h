@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "tup_types.h"
+#include "tup_utils.h"
 
 typedef enum
 {
@@ -24,10 +25,7 @@ typedef enum
     , tup_frameSender_status_fail
 } tup_frameSender_status_t;
 
-typedef struct
-{
-    uint8_t privateData[56];
-} tup_frameSender_t;
+PDESCR(tup_frameSender_t, 56, 8);
 
 typedef struct
 {

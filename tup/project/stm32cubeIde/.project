@@ -45,6 +45,11 @@
 			<locationURI>PARENT-2-PROJECT_LOC/inc/tup_port.h</locationURI>
 		</link>
 		<link>
+			<name>inc/tup_utils.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/inc/tup_utils.h</locationURI>
+		</link>
+		<link>
 			<name>inc/tup_v1_types.h</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/inc/tup_v1_types.h</locationURI>

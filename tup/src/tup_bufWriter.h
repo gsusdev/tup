@@ -7,7 +7,7 @@
 typedef struct
 {
 	const uint8_t privateData[32];
-} tup_bufWriter_t;
+} __attribute__ ((aligned (8))) tup_bufWriter_t;
 
 #if defined(__cplusplus)
 extern "C" {

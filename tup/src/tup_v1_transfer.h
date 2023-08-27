@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "tup_types.h"
+#include "tup_utils.h"
 #include "tup_v1_types.h"
 
 typedef enum
@@ -34,11 +36,6 @@ typedef void (*tup_transfer_onFail_t)(tup_transfer_fail_t failCode, uintptr_t ta
 typedef void (*tup_transfer_onAckSent_t)(uintptr_t tag);
 
 typedef struct
-{
-    uint8_t privateData[244];
-} tup_transfer_t;
-
-typedef struct
 {	
     void* workBuffer_p;
     size_t workBufferSize_bytes;	
@@ -61,6 +58,8 @@ typedef struct
     uintptr_t signalFuncsCallback;
     const char* name;
 } tup_transfer_initStruct_t;
+
+PDESCR(tup_transfer_t, 256, 8);
 
 #if defined(__cplusplus)
 extern "C" {

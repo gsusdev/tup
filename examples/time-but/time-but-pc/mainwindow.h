@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 
+#include "master_form.h"
+#include "slave_form.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -17,8 +20,12 @@ public:
 
 private slots:
     void butMasterFormClicked(bool checked);
+    void butSlaveFormClicked(bool checked);
 
 private:
     Ui::MainWindow *ui;
+
+    MasterForm* _masterForm_p = nullptr;
+    SlaveForm* _slaveForm_p = nullptr;
 };
 #endif // MAINWINDOW_H

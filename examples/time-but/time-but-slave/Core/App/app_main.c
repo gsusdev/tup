@@ -33,12 +33,12 @@ static bool isHandlingNeeded(uint32_t lastTime, uint32_t interval_ms);
 
 bool app_init()
 {
-	if (!initLink())
+	if (!initButton())
 	{
 		return false;
 	}
 
-	if (!initButton())
+	if (!initLink())
 	{
 		return false;
 	}
@@ -80,10 +80,10 @@ static bool initLink()
 static void handleLink()
 {
 	const bool handlingNeeded = isHandlingNeeded(app.lastLinkHandle_ms, TUP_HANDLE_INTERVAL_MS);
-	app.lastLinkHandle_ms = app.currentTimestamp_ms;
 
 	if (handlingNeeded)
 	{
+		app.lastLinkHandle_ms = app.currentTimestamp_ms;
 		getTime();
 	}
 
@@ -91,6 +91,7 @@ static void handleLink()
 
 	if (app_link_isUpdated())
 	{
+		app_link_resetIsUpdated();
 		setTime();
 	}
 
@@ -130,7 +131,7 @@ static void handleButton()
 
 		bool isDown;
 		err = butFilter_isDown(&app.butFilter, &isDown);
-		if ((err == butFilter_error_ok) && isEvent)
+		if (err == butFilter_error_ok)
 		{
 			app.slaveOutput.isButtonDown = isDown;
 		}
@@ -147,7 +148,16 @@ static bool isHandlingNeeded(uint32_t lastTime, uint32_t interval_ms)
 
 static void setTime()
 {
-	app_hal_setTime(2023, 1, 1, app.masterOutput.hour, app.masterOutput.minute, app.masterOutput.second, 0);
+	bool correct = true;
+
+	correct &= app.masterOutput.hour < 24;
+	correct &= app.masterOutput.minute < 60;
+	correct &= app.masterOutput.second < 60;
+
+	if (correct)
+	{
+		app_hal_setTime(2023, 1, 1, app.masterOutput.hour, app.masterOutput.minute, app.masterOutput.second, 0);
+	}
 }
 
 static void getTime()

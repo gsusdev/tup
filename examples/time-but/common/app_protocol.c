@@ -30,6 +30,7 @@ size_t app_protocol_encodeMasterOutput(const app_protocol_masterOutputData_t* da
 	*outByte_p++ = dataToEncode_p->hour;
 	*outByte_p++ = dataToEncode_p->minute;
 	*outByte_p++ = dataToEncode_p->second;
+    *outByte_p++ = 0; //reserved
 
 	const size_t resultSize = (uintptr_t)outByte_p - (uintptr_t)buf_out_p;
 	assert(resultSize == APP_PROTOCOL_MASTER_MESSAGE_SIZE_BYTES);
@@ -54,6 +55,7 @@ bool app_protocol_decodeMasterOutput(const void* buf_p, size_t size_bytes, app_p
 	decodedData_out_p->hour = *inByte_p++;
 	decodedData_out_p->minute = *inByte_p++;
 	decodedData_out_p->second = *inByte_p++;
+    ++inByte_p; // reserved
 
 	const size_t resultSize = (uintptr_t)inByte_p - (uintptr_t)buf_p;
 	assert(resultSize == APP_PROTOCOL_MASTER_MESSAGE_SIZE_BYTES);

@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "tup_utils.h"
 #include "tup_v1_types.h"
 
 typedef void (*tup_onConnect_t)(uintptr_t callbackValue);
@@ -46,10 +47,7 @@ typedef struct tup_initStruct_t
     const char* name;
 } tup_initStruct_t;
 
-typedef struct tup_instance_t
-{
-    uint8_t privateData[312];
-} tup_instance_t;
+PDESCR(tup_instance_t, 320, 8);
 
 #if defined(__cplusplus)
 extern "C" {

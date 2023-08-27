@@ -61,12 +61,18 @@ void MasterHandler::sendData()
 
 void MasterHandler::onReceiveData(QByteArray data, quint8 isFinal)
 {
+    if (_tup_p == nullptr)
+    {
+        return;
+    }
+
     _inputBuf.append(data);
     if (_inputBuf.size() > APP_PROTOCOL_SLAVE_MESSAGE_SIZE_BYTES)
     {
         _inputBuf.clear();
         emit sigOnBadFrame();
 
+        _tup_p->setResult(TUP_ERROR_NOMEMORY);
         return;
     }
 
@@ -80,6 +86,7 @@ void MasterHandler::onReceiveData(QByteArray data, quint8 isFinal)
         _inputBuf.clear();
         emit sigOnBadFrame();
 
+        _tup_p->setResult(TUP_ERROR_LEN);
         return;
     }
 
@@ -88,10 +95,13 @@ void MasterHandler::onReceiveData(QByteArray data, quint8 isFinal)
     {
         _slaveOutput = decodedData;
         emit sigOnUpdated();
+
+        _tup_p->setResult(TUP_OK);
     }
     else
     {
         emit sigOnBadFrame();
+        _tup_p->setResult(TUP_ERROR_UNKNOWN);
     }
 
     _inputBuf.clear();
