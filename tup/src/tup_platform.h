@@ -27,6 +27,12 @@ void tup_logDebug(const char* text);
 void tup_logTrace(const char* text);
 void tup_log_setMaxLevel(tup_log_severity_t severity);
 
+uintptr_t tup_enterCritical();
+void tup_exitCritical(uintptr_t returnValue);
+
+uintptr_t tup_enterCriticalIsr();
+void tup_exitCriticalIsr(uintptr_t returnValue);
+
 void tup_signal_fire(uintptr_t signal, uintptr_t callbackValue);
 bool tup_signal_wait(uintptr_t signal, uint32_t timeout_ms, uintptr_t callbackValue);
 

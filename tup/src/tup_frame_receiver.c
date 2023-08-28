@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdatomic.h>
 
+#include "tup_platform.h"
 #include "tup_header.h"
 #include "tup_body.h"
 
@@ -21,7 +22,7 @@ typedef struct
     tup_version_t version;
     volatile _Atomic tup_frameReceiver_status_t status;
     bool isHeaderDecoded;
-} __attribute__ ((aligned (8))) descriptor_t;
+} descriptor_t;
 
 STRUCT_ASSERT(tup_frameReceiver_t, descriptor_t);
 
@@ -88,8 +89,12 @@ tup_frameReceiver_error_t tup_frameReceiver_listen(tup_frameReceiver_t* descript
 {
     DESCR(descriptor_p);
 
+    const uintptr_t tmp = tup_enterCritical();
+
     tup_frameReceiver_status_t status = tup_frameReceiver_status_received;
     const bool isReceived = atomic_compare_exchange_strong(&descr_p->status, &status, tup_frameReceiver_status_receiving);
+
+    descr_p->expectedSize_bytes = TUP_HEADER_SIZE_BYTES;
 
     if (!isReceived)
     {
@@ -115,6 +120,7 @@ tup_frameReceiver_error_t tup_frameReceiver_listen(tup_frameReceiver_t* descript
             const volatile void* extraStart_p = descr_p->buffer_p + descr_p->fullFrameSize_bytes;
             memcpy(descr_p->buffer_p, extraStart_p, extraSize);
             descr_p->curPos_p = descr_p->buffer_p + extraSize;
+            descr_p->expectedSize_bytes = 0;
         }
         else
         {
@@ -127,6 +133,8 @@ tup_frameReceiver_error_t tup_frameReceiver_listen(tup_frameReceiver_t* descript
         descr_p->fullFrameSize_bytes = 0;
         descr_p->version = 0;
     }
+
+    tup_exitCritical(tmp);
 
     return tup_frameReceiver_error_ok;
 }
@@ -224,7 +232,7 @@ tup_frameReceiver_error_t tup_frameReceiver_received(
     {
         return tup_frameReceiver_error_ok;
     }
-    else if (descr_p->status != tup_frameReceiver_status_receiving)
+    else if ((descr_p->status != tup_frameReceiver_status_receiving) && ((descr_p->status != tup_frameReceiver_status_received)))
     {
         return tup_frameReceiver_error_invalidOperation;
     }
@@ -236,6 +244,8 @@ tup_frameReceiver_error_t tup_frameReceiver_received(
         return tup_frameReceiver_error_ok;
     }
 
+    const uintptr_t tmp = tup_enterCriticalIsr();
+
     if (buf_p != descr_p->curPos_p)
     {
         memcpy(descr_p->curPos_p, buf_p, size_bytes);
@@ -246,6 +256,8 @@ tup_frameReceiver_error_t tup_frameReceiver_received(
 
     const size_t usedSize = usedBufSize(descr_p);
     const size_t headerSize = TUP_HEADER_SIZE_BYTES;
+
+    tup_exitCriticalIsr(tmp);
 
     if (isHandlingNeeded_out_p != NULL)
     {

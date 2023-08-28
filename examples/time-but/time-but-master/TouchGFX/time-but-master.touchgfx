@@ -1,0 +1,643 @@
+{
+  "Application": {
+    "Screens": [
+      {
+        "Name": "MainScreen",
+        "Components": [
+          {
+            "Type": "FlexButton",
+            "Name": "butHourUp",
+            "X": 30,
+            "Y": 56,
+            "Width": 56,
+            "Height": 33,
+            "ButtonTrigger": {
+              "Type": "ClickButtonTrigger"
+            },
+            "ButtonStyles": [
+              {
+                "Type": "TextButtonStyle",
+                "TextId": "__SingleUse_ATNK",
+                "TextRotation": "0",
+                "ColorReleased": {
+                  "Red": 255,
+                  "Green": 255,
+                  "Blue": 255
+                },
+                "ColorPressed": {
+                  "Red": 184,
+                  "Green": 184,
+                  "Blue": 184
+                }
+              },
+              {
+                "Type": "BoxWithBorderButtonStyle",
+                "Width": 56,
+                "Height": 33,
+                "LockToFlexButtonSize": true,
+                "BorderSize": 5,
+                "ColorReleased": {
+                  "Green": 102,
+                  "Blue": 153
+                },
+                "ColorPressed": {
+                  "Green": 153,
+                  "Blue": 204
+                },
+                "ColorBorderReleased": {
+                  "Green": 51,
+                  "Blue": 102
+                },
+                "ColorBorderPressed": {
+                  "Red": 51,
+                  "Green": 102,
+                  "Blue": 153
+                }
+              }
+            ]
+          },
+          {
+            "Type": "FlexButton",
+            "Name": "butHourDown",
+            "X": 30,
+            "Y": 127,
+            "Width": 56,
+            "Height": 33,
+            "ButtonTrigger": {
+              "Type": "ClickButtonTrigger"
+            },
+            "ButtonStyles": [
+              {
+                "Type": "TextButtonStyle",
+                "TextId": "__SingleUse_OKZK",
+                "TextRotation": "0",
+                "ColorReleased": {
+                  "Red": 255,
+                  "Green": 255,
+                  "Blue": 255
+                },
+                "ColorPressed": {
+                  "Red": 184,
+                  "Green": 184,
+                  "Blue": 184
+                }
+              },
+              {
+                "Type": "BoxWithBorderButtonStyle",
+                "Width": 56,
+                "Height": 33,
+                "LockToFlexButtonSize": true,
+                "BorderSize": 5,
+                "ColorReleased": {
+                  "Green": 102,
+                  "Blue": 153
+                },
+                "ColorPressed": {
+                  "Green": 153,
+                  "Blue": 204
+                },
+                "ColorBorderReleased": {
+                  "Green": 51,
+                  "Blue": 102
+                },
+                "ColorBorderPressed": {
+                  "Red": 51,
+                  "Green": 102,
+                  "Blue": 153
+                }
+              }
+            ]
+          },
+          {
+            "Type": "TextArea",
+            "Name": "labHour",
+            "X": 51,
+            "Y": 98,
+            "Width": 15,
+            "Height": 24,
+            "TextId": "__SingleUse_MPY6",
+            "TextRotation": "0",
+            "Color": {
+              "Green": 127
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "FlexButton",
+            "Name": "butMinuteDown",
+            "X": 92,
+            "Y": 127,
+            "Width": 56,
+            "Height": 33,
+            "ButtonTrigger": {
+              "Type": "ClickButtonTrigger"
+            },
+            "ButtonStyles": [
+              {
+                "Type": "TextButtonStyle",
+                "TextId": "__SingleUse_9EU4",
+                "TextRotation": "0",
+                "ColorReleased": {
+                  "Red": 255,
+                  "Green": 255,
+                  "Blue": 255
+                },
+                "ColorPressed": {
+                  "Red": 184,
+                  "Green": 184,
+                  "Blue": 184
+                }
+              },
+              {
+                "Type": "BoxWithBorderButtonStyle",
+                "Width": 56,
+                "Height": 33,
+                "LockToFlexButtonSize": true,
+                "BorderSize": 5,
+                "ColorReleased": {
+                  "Green": 102,
+                  "Blue": 153
+                },
+                "ColorPressed": {
+                  "Green": 153,
+                  "Blue": 204
+                },
+                "ColorBorderReleased": {
+                  "Green": 51,
+                  "Blue": 102
+                },
+                "ColorBorderPressed": {
+                  "Red": 51,
+                  "Green": 102,
+                  "Blue": 153
+                }
+              }
+            ]
+          },
+          {
+            "Type": "FlexButton",
+            "Name": "butMinuteUp",
+            "X": 92,
+            "Y": 56,
+            "Width": 56,
+            "Height": 33,
+            "ButtonTrigger": {
+              "Type": "ClickButtonTrigger"
+            },
+            "ButtonStyles": [
+              {
+                "Type": "TextButtonStyle",
+                "TextId": "__SingleUse_ENYZ",
+                "TextRotation": "0",
+                "ColorReleased": {
+                  "Red": 255,
+                  "Green": 255,
+                  "Blue": 255
+                },
+                "ColorPressed": {
+                  "Red": 184,
+                  "Green": 184,
+                  "Blue": 184
+                }
+              },
+              {
+                "Type": "BoxWithBorderButtonStyle",
+                "Width": 56,
+                "Height": 33,
+                "LockToFlexButtonSize": true,
+                "BorderSize": 5,
+                "ColorReleased": {
+                  "Green": 102,
+                  "Blue": 153
+                },
+                "ColorPressed": {
+                  "Green": 153,
+                  "Blue": 204
+                },
+                "ColorBorderReleased": {
+                  "Green": 51,
+                  "Blue": 102
+                },
+                "ColorBorderPressed": {
+                  "Red": 51,
+                  "Green": 102,
+                  "Blue": 153
+                }
+              }
+            ]
+          },
+          {
+            "Type": "TextArea",
+            "Name": "labSecond",
+            "X": 173,
+            "Y": 98,
+            "Width": 14,
+            "Height": 24,
+            "TextId": "__SingleUse_U79U",
+            "TextRotation": "0",
+            "Color": {
+              "Green": 127
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "ButtonWithLabel",
+            "Name": "butConnect",
+            "Width": 240,
+            "Height": 50,
+            "Pressed": "__generated\\alternate_theme_images_widgets_button_regular_height_50_medium_rounded_pressed.png",
+            "Released": "__generated\\alternate_theme_images_widgets_button_regular_height_50_medium_rounded_normal.png",
+            "TextId": "__SingleUse_YD3A",
+            "ReleasedColor": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "PressedColor": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "TextRotation": "0",
+            "Preset": "alternate_theme\\presets\\button\\regular\\height_50\\medium_rounded_normal.json"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "labMinute",
+            "X": 112,
+            "Y": 98,
+            "Width": 17,
+            "Height": 24,
+            "TextId": "__SingleUse_3DBF",
+            "TextRotation": "0",
+            "Color": {
+              "Green": 127
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "FlexButton",
+            "Name": "butSecondUp",
+            "X": 152,
+            "Y": 56,
+            "Width": 56,
+            "Height": 33,
+            "ButtonTrigger": {
+              "Type": "ClickButtonTrigger"
+            },
+            "ButtonStyles": [
+              {
+                "Type": "TextButtonStyle",
+                "TextId": "__SingleUse_SHS5",
+                "TextRotation": "0",
+                "ColorReleased": {
+                  "Red": 255,
+                  "Green": 255,
+                  "Blue": 255
+                },
+                "ColorPressed": {
+                  "Red": 184,
+                  "Green": 184,
+                  "Blue": 184
+                }
+              },
+              {
+                "Type": "BoxWithBorderButtonStyle",
+                "Width": 56,
+                "Height": 33,
+                "LockToFlexButtonSize": true,
+                "BorderSize": 5,
+                "ColorReleased": {
+                  "Green": 102,
+                  "Blue": 153
+                },
+                "ColorPressed": {
+                  "Green": 153,
+                  "Blue": 204
+                },
+                "ColorBorderReleased": {
+                  "Green": 51,
+                  "Blue": 102
+                },
+                "ColorBorderPressed": {
+                  "Red": 51,
+                  "Green": 102,
+                  "Blue": 153
+                }
+              }
+            ]
+          },
+          {
+            "Type": "FlexButton",
+            "Name": "butSecondDown",
+            "X": 152,
+            "Y": 127,
+            "Width": 56,
+            "Height": 33,
+            "ButtonTrigger": {
+              "Type": "ClickButtonTrigger"
+            },
+            "ButtonStyles": [
+              {
+                "Type": "TextButtonStyle",
+                "TextId": "__SingleUse_ZJR8",
+                "TextRotation": "0",
+                "ColorReleased": {
+                  "Red": 255,
+                  "Green": 255,
+                  "Blue": 255
+                },
+                "ColorPressed": {
+                  "Red": 184,
+                  "Green": 184,
+                  "Blue": 184
+                }
+              },
+              {
+                "Type": "BoxWithBorderButtonStyle",
+                "Width": 56,
+                "Height": 33,
+                "LockToFlexButtonSize": true,
+                "BorderSize": 5,
+                "ColorReleased": {
+                  "Green": 102,
+                  "Blue": 153
+                },
+                "ColorPressed": {
+                  "Green": 153,
+                  "Blue": 204
+                },
+                "ColorBorderReleased": {
+                  "Green": 51,
+                  "Blue": 102
+                },
+                "ColorBorderPressed": {
+                  "Red": 51,
+                  "Green": 102,
+                  "Blue": 153
+                }
+              }
+            ]
+          },
+          {
+            "Type": "ToggleButton",
+            "Name": "butUpdate",
+            "X": 112,
+            "Y": 171,
+            "Width": 110,
+            "Height": 50,
+            "Pressed": "__generated\\alternate_theme_images_widgets_togglebutton_medium_rounded_off_light.png",
+            "Released": "__generated\\alternate_theme_images_widgets_togglebutton_medium_rounded_on_normal.png",
+            "Preset": "alternate_theme\\presets\\togglebutton\\medium\\rounded.json"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea1",
+            "X": 30,
+            "Y": 184,
+            "Width": 71,
+            "Height": 24,
+            "TextId": "__SingleUse_Q7NT",
+            "TextRotation": "0",
+            "Color": {
+              "Green": 127
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea2",
+            "X": 30,
+            "Y": 236,
+            "Width": 86,
+            "Height": 24,
+            "TextId": "__SingleUse_SHYX",
+            "TextRotation": "0",
+            "Color": {
+              "Green": 127
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "labRemoteTime",
+            "X": 127,
+            "Y": 236,
+            "Width": 110,
+            "Height": 24,
+            "TextId": "__SingleUse_KYIC",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea3",
+            "X": 30,
+            "Y": 261,
+            "Width": 65,
+            "Height": 24,
+            "TextId": "__SingleUse_9USB",
+            "TextRotation": "0",
+            "Color": {
+              "Green": 127
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "labClicks",
+            "X": 127,
+            "Y": 261,
+            "Width": 13,
+            "Height": 24,
+            "TextId": "__SingleUse_JUNK",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea4",
+            "X": 30,
+            "Y": 285,
+            "Width": 65,
+            "Height": 24,
+            "TextId": "__SingleUse_JG56",
+            "TextRotation": "0",
+            "Color": {
+              "Green": 127
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "labButDown",
+            "X": 127,
+            "Y": 285,
+            "Width": 50,
+            "Height": 24,
+            "TextId": "__SingleUse_ER24",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255
+            },
+            "AutoSize": true
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "itrButHourUpClicked",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "butHourUp"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "butHourUpClicked"
+            }
+          },
+          {
+            "InteractionName": "itrButHourDownClicked",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "butHourDown"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "butHourDownClicked"
+            }
+          },
+          {
+            "InteractionName": "itrButMinuteUpClicked",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "butMinuteUp"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "butMinuteUpClicked"
+            }
+          },
+          {
+            "InteractionName": "itrButMinuteDownClicked",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "butMinuteDown"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "butMinuteDownClicked"
+            }
+          },
+          {
+            "InteractionName": "itrButSecondUpClicked",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "butSecondUp"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "butSecondUpClicked"
+            }
+          },
+          {
+            "InteractionName": "itrButSecondDownClicked",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "butSecondDown"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "butSecondDownClicked"
+            }
+          },
+          {
+            "InteractionName": "itrButConnectClicked",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "butConnect"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "butConnectClicked"
+            }
+          },
+          {
+            "InteractionName": "itrButUpdateClicked",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "butUpdate"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "butUpdateClicked"
+            }
+          }
+        ]
+      }
+    ],
+    "CustomContainerDefinitions": [],
+    "Name": "time-but-master",
+    "Resolution": {
+      "Width": 240,
+      "Height": 320
+    },
+    "SelectedColorDepth": 16,
+    "StartupScreenName": "MainScreen",
+    "SelectedStartupLanguage": "GB",
+    "TouchGfxPath": "../Middlewares/ST/touchgfx",
+    "UIPath": ".",
+    "AvailableColorDepths": [
+      16
+    ],
+    "AvailableLCDs": {
+      "16": "LCD16bpp"
+    },
+    "AvailableSections": [
+      "ExtFlashSection",
+      "IntFlashSection"
+    ],
+    "AvailableResolutions": [
+      {
+        "Width": 240,
+        "Height": 320
+      }
+    ],
+    "PhysicalButtons": [],
+    "FrameworkFeatures": {
+      "LCD16bpp": {
+        "Id": "LCD16bpp",
+        "IsEnabled": true
+      }
+    },
+    "GenerateAssetsCommand": "make -f simulator/gcc/Makefile assets -j8",
+    "PostGenerateCommand": "touchgfx update_project --project-file=simulator/msvs/Application.vcxproj",
+    "PostGenerateTargetCommand": "touchgfx update_project",
+    "CompileSimulatorCommand": "make -f simulator/gcc/Makefile -j8",
+    "RunSimulatorCommand": "build\\bin\\simulator.exe",
+    "CompileTargetCommandOverride": "make -f ../gcc/Makefile -j8",
+    "FlashTargetCommandOverride": "make -f ../gcc/Makefile flash",
+    "LandscapeSkinX": 0,
+    "LandscapeSkinY": 0,
+    "PortraitSkinX": 0,
+    "PortraitSkinY": 0,
+    "DisplayOrientation": "Portrait",
+    "Family": "STM32F4",
+    "SubFamily": "STM32F429/439",
+    "Toolchain": "STM32CubeIDE",
+    "Platform": "m4",
+    "ProjectFile": "../STM32F429I_DISCO_REV_D01.ioc",
+    "OptionalComponentsRoot": "../Middlewares/ST/touchgfx_components",
+    "OptionalComponents": [],
+    "AdditionalFeatures": [
+      "Vector"
+    ]
+  },
+  "Version": "4.22.0",
+  "CreatedBy": "4.22.0"
+}

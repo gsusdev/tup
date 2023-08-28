@@ -8,6 +8,11 @@ static tup_port_linkTransmitHandler_t linkTransmitHandler = NULL;
 static tup_port_getCurrentTimeHandler_t getCurrentTimeHandler = NULL;
 static tup_port_logHandler_t logHandler = NULL;
 
+static tup_port_enterCriticalHandler_t enterCriticalHandler = NULL;
+static tup_port_exitCriticalHandler_t exitCriticalHandler = NULL;
+static tup_port_enterCriticalHandler_t enterCriticalIsrHandler = NULL;
+static tup_port_exitCriticalHandler_t exitCriticalIsrHandler = NULL;
+
 static tup_port_signalFireHandler_t signalFireHandler = NULL;
 static tup_port_signalWaitHandler_t signalWaitHandler = NULL;
 
@@ -36,6 +41,26 @@ void tup_port_setGetCurrentTimeHandler(tup_port_getCurrentTimeHandler_t handler)
 void tup_port_setLogHandler(tup_port_logHandler_t handler)
 {
     logHandler = handler;
+}
+
+void tup_port_setEnterCriticalHandler(tup_port_enterCriticalHandler_t handler)
+{
+    enterCriticalHandler = handler;
+}
+
+void tup_port_setExitCriticalHandler(tup_port_exitCriticalHandler_t handler)
+{
+    exitCriticalHandler = handler;
+}
+
+void tup_port_setEnterCriticalIsrHandler(tup_port_enterCriticalHandler_t handler)
+{
+    enterCriticalIsrHandler = handler;
+}
+
+void tup_port_setExitCriticalIsrHandler(tup_port_exitCriticalHandler_t handler)
+{
+    exitCriticalIsrHandler = handler;
 }
 
 void tup_link_transmit(const void* buf_p, size_t size_bytes, uintptr_t callbackValue)
@@ -110,3 +135,41 @@ bool tup_signal_wait(uintptr_t signal, uint32_t timeout_ms, uintptr_t callbackVa
 
     return result;
 }
+
+uintptr_t tup_enterCritical()
+{
+    if (enterCriticalHandler != NULL)
+    {
+        return enterCriticalHandler();
+    }
+
+    return 0;
+}
+
+void tup_exitCritical(uintptr_t returnValue)
+{
+    if (exitCriticalHandler != NULL)
+    {
+        exitCriticalHandler(returnValue);
+    }
+}
+
+uintptr_t tup_enterCriticalIsr()
+{
+    if (enterCriticalIsrHandler != NULL)
+    {
+        return enterCriticalIsrHandler();
+    }
+
+    return 0;
+}
+
+void tup_exitCriticalIsr(uintptr_t returnValue)
+{
+    if (exitCriticalIsrHandler != NULL)
+    {
+        exitCriticalIsrHandler(returnValue);
+    }
+}
+
+

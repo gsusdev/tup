@@ -118,12 +118,12 @@ static bool receivedBadFrame(descriptor_t* descr_p, tup_frameError_t error);
 static void invokeHandlingFunc(descriptor_t* descr_p);
 static bool waitForSignal(descriptor_t* descr_p, uint32_t timeout_ms);
 
-static void log(const descriptor_t* descr_p, const char* text, tup_log_severity_t severity);
+static void _log(const descriptor_t* descr_p, const char* text, tup_log_severity_t severity);
 
-#define INFO(text) log(descr_p, text, tup_log_info)
-#define ERROR(text) log(descr_p, text, tup_log_error)
-#define DEBUG(text) log(descr_p, text, tup_log_info)
-#define TRACE(text) log(descr_p, text, tup_log_trace)
+#define INFO(text) _log(descr_p, text, tup_log_info)
+#define ERROR(text) _log(descr_p, text, tup_log_error)
+#define DEBUG(text) _log(descr_p, text, tup_log_info)
+#define TRACE(text) _log(descr_p, text, tup_log_trace)
 
 tup_transfer_error_t tup_transfer_init(tup_transfer_t* descriptor_p, const tup_transfer_initStruct_t* init_p)
 {
@@ -1104,7 +1104,7 @@ static bool layoutBuffers(descriptor_t* descr_p, void volatile* buf_p, size_t bu
     return true;
 }
 
-static void log(const descriptor_t* descr_p, const char* text, tup_log_severity_t severity)
+static void _log(const descriptor_t* descr_p, const char* text, tup_log_severity_t severity)
 {
     if (descr_p->name != NULL)
     {

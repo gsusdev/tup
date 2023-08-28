@@ -1,9 +1,5 @@
 #pragma once
 
-#include <stddef.h>
-#include <stdint.h>
-#include <stdbool.h>
-
 #define TUP_PORT_BAUDRATE 115200u
 #define TUP_HANDLE_INTERVAL_MS 10u
 #define TUP_RX_BUF_SIZE_BYTES 64u

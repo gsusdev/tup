@@ -21,6 +21,7 @@ MasterForm::MasterForm(QWidget *parent) :
 
     _tup.setIsMaster(true);
     _tup.setPort(&_port);
+    _tup.setRxBufSize(128);
 
     _master.setTup(&_tup);
 
@@ -61,7 +62,8 @@ void MasterForm::slotPortClosed()
     ui->chkAutoSend->setEnabled(false);
     ui->chkAutoSend->setChecked(false);
 
-    _tup.stop();
+    _timer.stop();
+    _tup.stop();    
 }
 
 void MasterForm::slotButConnectClicked(bool checked)

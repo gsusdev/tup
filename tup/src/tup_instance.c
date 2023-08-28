@@ -73,13 +73,12 @@ static void onAckSentHandler(uintptr_t tag);
 static bool checkDescr(const descriptor_t* descr_p);
 static bool sendNextDataChunk(descriptor_t* descr_p);
 
-static void log(const descriptor_t* descr_p, const char* text, tup_log_severity_t severity);
+static void _log(const descriptor_t* descr_p, const char* text, tup_log_severity_t severity);
 
-#define INFO(text) log(descr_p, text, tup_log_info)
-#define ERROR(text) log(descr_p, text, tup_log_error)
-#define DEBUG(text) log(descr_p, text, tup_log_info)
-#define TRACE(text) log(descr_p, text, tup_log_trace)
-
+#define INFO(text) _log(descr_p, text, tup_log_info)
+#define ERROR(text) _log(descr_p, text, tup_log_error)
+#define DEBUG(text) _log(descr_p, text, tup_log_info)
+#define TRACE(text) _log(descr_p, text, tup_log_trace)
 
 tup_error_t tup_init(tup_instance_t* instance_p, const tup_initStruct_t* initStruct_p)
 {
@@ -93,7 +92,6 @@ tup_error_t tup_init(tup_instance_t* instance_p, const tup_initStruct_t* initStr
     ok &= initStruct_p->flushDuration_ms > 0;
     ok &= initStruct_p->retryPause_ms > 0;
     ok &= initStruct_p->tryCount > 0;
-    ok &= initStruct_p->userCallbackValue > 0;
     ok &= initStruct_p->workBufferSize_bytes > 0;
     ok &= initStruct_p->workBuffer_p != NULL;
     ok &= initStruct_p->onReceiveData != NULL;
@@ -423,6 +421,7 @@ static void dataChunkSent(descriptor_t* descr_p)
     {
         descr_p->isSendingData = false;
         descr_p->state = state_ready;
+        INFO("Sending completed");
     }
     else
     {
@@ -460,6 +459,9 @@ static void onCompletedHandler(tup_transfer_result_t resultCode, uintptr_t tag)
             case state_waitDataAck:
                 dataChunkSent(descr_p);
                 break;
+
+            default:
+                ERROR("Reached switch default in onCompletedHandler");
         }
     }
     else
@@ -590,10 +592,13 @@ static void onAckSentHandler(uintptr_t tag)
         		descr_p->onSendResult(descr_p->userCallbackValue);
         	}
         	break;
+
+        default:
+        	ERROR("Reached switch default in onAckSentHandler");
     }
 }
 
-static void log(const descriptor_t* descr_p, const char* text, tup_log_severity_t severity)
+static void _log(const descriptor_t* descr_p, const char* text, tup_log_severity_t severity)
 {
     if (descr_p->name != NULL)
     {

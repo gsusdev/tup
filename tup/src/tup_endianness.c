@@ -45,7 +45,7 @@ uint32_t tup_endianness_convert32(uint32_t value, bool isBig)
     b3 = (value >> 16u) & 0xFFu;
     b4 = (value >> 24u) & 0xFFu;
 
-    return (b1 << 24u) | (b2 << 16u) | (b3 << 8u) + b4;
+    return ((b1 << 24u) | (b2 << 16u) | (b3 << 8u) | b4);
 }
 
 uint16_t tup_endianness_convert16(uint16_t value, bool isBig)

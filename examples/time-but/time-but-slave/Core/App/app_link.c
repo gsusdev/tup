@@ -21,6 +21,7 @@ static struct
 	const app_protocol_slaveOutputData_t* slaveData_p;
 	uint8_t tupWorkBuffer[TUP_RX_BUF_SIZE_BYTES * 2];
 	uint8_t slavePayloadBuf[APP_PROTOCOL_SLAVE_MESSAGE_SIZE_BYTES];
+	uint32_t lastSetResultTime_ms;
 } link = {0};
 
 static const char instanceName[] = "TUP_SLAVE";
@@ -36,7 +37,10 @@ static void onSendResultHandler(uintptr_t callbackValue);
 static void onReceiveDataHandler(const void volatile* buf_p, size_t size_bytes, bool isFinal, uintptr_t callbackValue);
 
 static void linkTransmitHandler(const void* buf_p, size_t size_bytes, uintptr_t callbackValue);
+
 static void signalFireHandle(uintptr_t signal, uintptr_t callbackValue);
+static uintptr_t enterCriticalHandler();
+static void exitCriticalHandler(uintptr_t returnValue);
 
 bool app_link_init(const app_link_initStruct_t* initStruct_p)
 {
@@ -77,7 +81,7 @@ void app_link_handle()
 	}
 
 	const uint32_t timestamp = app_hal_getTimestamp();
-	const uint32_t elapsed = getTimeElapsed(link.lastHandlingTime_ms, timestamp);
+	uint32_t elapsed = getTimeElapsed(link.lastHandlingTime_ms, timestamp);
 
 	bool signalFired = true;
 	bool needHandling = atomic_compare_exchange_strong(&link.isSignalFired, &signalFired, false);
@@ -87,6 +91,16 @@ void app_link_handle()
 	{
 		tup_handle(&link.tup);
 		link.lastHandlingTime_ms = timestamp;
+	}
+
+	if (link.lastSetResultTime_ms > 0)
+	{
+		elapsed = getTimeElapsed(link.lastSetResultTime_ms, timestamp);
+		if (elapsed > 1)
+		{
+			link.lastSetResultTime_ms = 0;
+			tup_sendData(&link.tup, link.slavePayloadBuf, sizeof(link.slavePayloadBuf));
+		}
 	}
 }
 
@@ -124,6 +138,10 @@ static bool initTup()
 	tup_port_setLinkTransmitHandler(linkTransmitHandler);
 	tup_port_setLogHandler(app_hal_log);
 	tup_port_setSignalFireHandler(signalFireHandle);
+	tup_port_setEnterCriticalHandler(enterCriticalHandler);
+	tup_port_setExitCriticalHandler(exitCriticalHandler);
+	tup_port_setEnterCriticalIsrHandler(enterCriticalHandler);
+	tup_port_setExitCriticalIsrHandler(exitCriticalHandler);
 
 	initStruct.isMaster = false;
 	initStruct.name = instanceName;
@@ -180,6 +198,22 @@ static void signalFireHandle(uintptr_t signal, uintptr_t callbackValue)
 	link.isSignalFired = true;
 }
 
+static uintptr_t enterCriticalHandler()
+{
+	const uintptr_t result = __get_PRIMASK();
+	__disable_irq();
+
+	return result;
+}
+
+static void exitCriticalHandler(uintptr_t returnValue)
+{
+	if (returnValue == 0)
+	{
+		__enable_irq();
+	}
+}
+
 static void onSendResultHandler(uintptr_t callbackValue)
 {
 	(void)callbackValue;
@@ -190,7 +224,7 @@ static void onSendResultHandler(uintptr_t callbackValue)
 		return;
 	}
 
-	tup_sendData(&link.tup, link.slavePayloadBuf, sizeof(link.slavePayloadBuf));
+	link.lastSetResultTime_ms = app_hal_getTimestamp();
 }
 
 static void onReceiveDataHandler(const void volatile* buf_p, size_t size_bytes, bool isFinal, uintptr_t callbackValue)

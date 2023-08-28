@@ -5,6 +5,10 @@
 
 #include "tup_port.h"
 
+#if defined(WIN32)
+    #include <windows.h>
+#endif
+
 class InstanceSignalsInvoker
 {
 public:
@@ -82,6 +86,11 @@ private:
     tup_instance_t* _instance_p = nullptr;
 };
 
+#if defined(WIN32)
+    static CRITICAL_SECTION critical;
+    static bool criticalInitialized = false;
+#endif
+
 static void onConnectHandler(uintptr_t callbackValue)
 {
     auto& invoker = *reinterpret_cast<InstanceSignalsInvoker*>(callbackValue);
@@ -150,9 +159,29 @@ static bool signalWaitHandler(uintptr_t signal, uint32_t timeout_ms, uintptr_t c
     return result;
 }
 
+static uintptr_t enterCriticalHandler()
+{
+    EnterCriticalSection(&critical);
+    return 0;
+}
+
+static void exitCriticalHandler(uintptr_t returnValue)
+{
+    (void)returnValue;
+    LeaveCriticalSection(&critical);
+}
+
 TupWrapper::TupWrapper(QObject *parent)
     : QObject{parent}
 {
+#if defined(WIN32)
+    if (!criticalInitialized)
+    {
+        InitializeCriticalSection(&critical);
+        criticalInitialized = true;
+    }
+#endif
+
     _sigInvoker_p = new InstanceSignalsInvoker(*this);
 
     _initStruct.synTimeout_ms = 2000;
@@ -211,6 +240,10 @@ bool TupWrapper::run()
     tup_port_setSignalWaitHandler(signalWaitHandler);
     tup_port_setGetCurrentTimeHandler(getCurrentTimeHandler);
     tup_port_setLogHandler(tupPortLogHandler);
+    tup_port_setEnterCriticalHandler(enterCriticalHandler);
+    tup_port_setExitCriticalHandler(exitCriticalHandler);
+    tup_port_setEnterCriticalIsrHandler(enterCriticalHandler);
+    tup_port_setExitCriticalIsrHandler(exitCriticalHandler);
 
     _workBuf.resize(_initStruct.rxBufSize_bytes * 2);
 

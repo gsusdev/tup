@@ -10,14 +10,23 @@
 #include "stm32f4xx_hal.h"
 #include "usbd_cdc_if.h"
 
-uart_t uart = {0};
+struct {
+
+	volatile uint8_t dmaBuf[32];
+	volatile size_t lastBufPos;
+	UART_HandleTypeDef* instance_p;
+	app_hal_uartRxHandler_t rxHandler;
+	app_hal_uartRxErrorHandler_t rxErrorHandler;
+	app_hal_uartTxHandler_t txHandler;
+	volatile _Atomic bool isBusy;
+	bool isInit;
+} __attribute__ ((aligned (8))) uart = {0};
 
 extern RTC_HandleTypeDef hrtc;
 extern UART_HandleTypeDef huart2;
 
 volatile size_t receivedSize_bytes = 0;
 volatile size_t sentSize_bytes = 0;
-volatile size_t txBusyCount = 0;
 
 bool app_hal_uartInit(uint32_t baudrate, app_hal_uartRxHandler_t rxHandler, app_hal_uartRxErrorHandler_t rxErrorHandler, app_hal_uartTxHandler_t txHandler)
 {
@@ -59,10 +68,9 @@ bool app_hal_uartSend(const void* buf_p, size_t size_bytes)
 		return false;
 	}
 
-	size_t isBusy = false;
+	bool isBusy = false;
 	if (!atomic_compare_exchange_strong(&uart.isBusy, &isBusy, true))
 	{
-		++txBusyCount;
 		return false;
 	}
 
@@ -203,11 +211,12 @@ bool app_hal_getButtonState(bool* isPressed_out_p)
 
 void app_hal_log(const char* text)
 {
-
+	const size_t len = strlen(text);
+	for (size_t i = 0; i < len; ++i)
+	{
+		ITM_SendChar(text[i]);
+	}
 }
-
-static uint16_t sendHistory[32] = {0};
-static size_t sendHistoryPos;
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -219,7 +228,6 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 	if ((huart == uart.instance_p) && (uart.txHandler != NULL))
 	{
 		uart.isBusy = false;
-		sendHistory[sendHistoryPos++] = uart.instance_p->TxXferSize;
 		sentSize_bytes += uart.instance_p->TxXferSize;
 		uart.txHandler(uart.instance_p->TxXferSize);
 	}
