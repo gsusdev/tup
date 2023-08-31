@@ -10,7 +10,7 @@
 
 typedef void (*app_link_onRetryProgress_t)(uint32_t attemptNumber, uint32_t maxAttemptCount, uint32_t remainingPauseTime_ms);
 typedef void (*app_link_onConnect_t)();
-typedef void (*app_link_onFail_t)();
+typedef void (*app_link_onFail_t)(uint32_t failCode);
 
 typedef struct app_link_initStruct_t
 {

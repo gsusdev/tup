@@ -153,5 +153,6 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 	if ((huart == uart.instance_p) && (uart.rxErrorHandler != NULL))
 	{
 		uart.rxErrorHandler(huart->ErrorCode);
+		HAL_UARTEx_ReceiveToIdle_DMA(uart.instance_p, (uint8_t *)uart.dmaBuf, sizeof(uart.dmaBuf));
 	}
 }

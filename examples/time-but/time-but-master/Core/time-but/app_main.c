@@ -42,7 +42,7 @@ static bool lock();
 static void unlock();
 
 static void onConnectHandler();
-static void onFailHandler();
+static void onFailHandler(uint32_t failCode);
 
 void app_display_showStatus(const char* text);
 void app_display_showSlaveInfo(int8_t h, int8_t m, int8_t s, bool isButDown, int8_t clickCount);
@@ -160,9 +160,11 @@ static void onConnectHandler()
 	app_display_showStatus("Connected");
 }
 
-static void onFailHandler()
+static void onFailHandler(uint32_t failCode)
 {
-	app_display_showStatus("Fail");
+	char text[16];
+	snprintf(text, sizeof(text), "Fail %lu", failCode);
+	app_display_showStatus(text);
 }
 
 static bool lock()

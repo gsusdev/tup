@@ -355,7 +355,7 @@ static void onFailHandler(tup_transfer_fail_t failCode, uintptr_t callbackValue)
 
 	if (link.onFail != NULL)
 	{
-		link.onFail();
+		link.onFail(failCode);
 	}
 }
 
