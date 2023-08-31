@@ -37,6 +37,7 @@ extern "C" {
 #endif
 
 tup_frameSender_error_t tup_frameSender_init(tup_frameSender_t* descriptor_p, const tup_frameSender_initStruct_t* initStruct_p);
+tup_frameSender_error_t tup_frameSender_reset(tup_frameSender_t* descriptor_p);
 tup_frameSender_error_t tup_frameSender_send(tup_frameSender_t* descriptor_p, tup_version_t version, const void* body_p, size_t fullBodySize_bytes);
 tup_frameSender_error_t tup_frameSender_signAndSend(tup_frameSender_t* descriptor_p, tup_version_t version, void* body_p, size_t fullBodySize_bytes);
 tup_frameSender_error_t tup_frameSender_getStatus(const tup_frameSender_t* descriptor_p, tup_frameSender_status_t* status_out_p);

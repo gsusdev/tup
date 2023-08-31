@@ -34,6 +34,8 @@ typedef struct descriptor_t
     tup_onDisconnectRequest_t onDisconnectRequest;
     tup_onReceiveData_t onReceiveData;
     tup_onSendDataProgress_t onSendDataProgress;
+    tup_onRetryProgress_t onRetryProgress;
+    tup_onBadResponse_t onBadResponse;
     tup_onSendResult_t onSendResult;
     tup_onFail_t onFail;
     uintptr_t userCallbackValue;
@@ -67,9 +69,10 @@ static void onCompletedHandler(tup_transfer_result_t resultCode, uintptr_t tag);
 static void onInvalidFrameHandler(tup_frameError_t error, uintptr_t tag);
 static void onSynHandler(uint32_t j, size_t windowSize, uintptr_t tag);
 static void onFinHandler(uintptr_t tag);
-static void onDataHandler(const void volatile* payload_p, size_t payloadSize_bytes, bool isFinal, uintptr_t tag);
+static void onDataHandler(const void volatile* payload_p, size_t payloadSize_bytes, uint32_t j, bool isFinal, uintptr_t tag);
 static void onFailHandler(tup_transfer_fail_t failCode, uintptr_t tag);
 static void onAckSentHandler(uintptr_t tag);
+static void onRetryProgressHandler(uint32_t attemptNumber, uint32_t maxAttemptCount, uint32_t remainingTime_ms, uintptr_t tag);
 static bool checkDescr(const descriptor_t* descr_p);
 static bool sendNextDataChunk(descriptor_t* descr_p);
 
@@ -109,6 +112,8 @@ tup_error_t tup_init(tup_instance_t* instance_p, const tup_initStruct_t* initStr
     descr_p->onConnect = initStruct_p->onConnect;
     descr_p->onDisconnectRequest = initStruct_p->onDisconnectRequest;
     descr_p->onSendDataProgress = initStruct_p->onSendDataProgress;
+    descr_p->onRetryProgress = initStruct_p->onRetryProgress;
+    descr_p->onBadResponse = initStruct_p->onBadResponse;
     descr_p->onSendResult = initStruct_p->onSendResult;
     descr_p->onReceiveData = initStruct_p->onReceiveData;
     descr_p->onFail = initStruct_p->onFail;
@@ -134,6 +139,7 @@ tup_error_t tup_init(tup_instance_t* instance_p, const tup_initStruct_t* initStr
     transferInit.onFail = onFailHandler;
     transferInit.onInvalidFrame = onInvalidFrameHandler;
     transferInit.onAckSent = onAckSentHandler;
+    transferInit.onRetryProgress = onRetryProgressHandler;
     transferInit.userCallbackValue = (uintptr_t)descr_p;
     transferInit.txCallbackValue = initStruct_p->txCallbackValue;
     transferInit.signal = initStruct_p->signal;
@@ -168,6 +174,7 @@ tup_error_t tup_connect(tup_instance_t* instance_p)
         return tup_error_invalidOperation;
     }
 
+    tup_transfer_reset(&descr_p->transfer);
     tup_transfer_error_t err = tup_transfer_listen(&descr_p->transfer);
     if (err != tup_transfer_error_ok)
     {
@@ -200,6 +207,7 @@ tup_error_t tup_accept(tup_instance_t *instance_p)
         return tup_error_invalidOperation;
     }
 
+    tup_transfer_reset(&descr_p->transfer);
     tup_transfer_error_t err = tup_transfer_listen(&descr_p->transfer);
     if (err != tup_transfer_error_ok)
     {
@@ -265,6 +273,8 @@ tup_error_t tup_sendFin(tup_instance_t* instance_p)
         return tup_error_invalidOperation;
     }
 
+    DEBUG("tup_sendFin");
+
     const tup_transfer_error_t err = tup_transfer_sendFin(&descr_p->transfer);
     if (err != tup_transfer_error_ok)
     {
@@ -291,6 +301,8 @@ tup_error_t tup_sendData(tup_instance_t* instance_p, const void* buf_p, size_t s
         return tup_error_invalidOperation;
     }
 
+    DEBUG("tup_sendData");
+
     descr_p->sendBuf_p = buf_p;
     descr_p->sendingSize = size_bytes;
     descr_p->totalSentSize = 0;
@@ -312,6 +324,8 @@ tup_error_t tup_setResult(tup_instance_t* instance_p, tup_transfer_result_t resu
     {
         return tup_error_invalidOperation;
     }
+
+    DEBUG("tup_setResult");
 
     tup_transfer_error_t err = tup_transfer_setResult(&descr_p->transfer, result);
     if (err != tup_transfer_error_ok)
@@ -445,6 +459,7 @@ static void onCompletedHandler(tup_transfer_result_t resultCode, uintptr_t tag)
 
             case state_slave_waitSynAckFromMaster:
                 descr_p->state = state_ready;
+                INFO("Connected to master");
                 if (descr_p->onConnect != NULL)
                 {
                     descr_p->onConnect(descr_p->userCallbackValue);
@@ -466,7 +481,10 @@ static void onCompletedHandler(tup_transfer_result_t resultCode, uintptr_t tag)
     }
     else
     {
-        //TODO
+        if (descr_p->onBadResponse != NULL)
+        {
+            descr_p->onBadResponse(resultCode, descr_p->userCallbackValue);
+        }
     }
 }
 
@@ -503,23 +521,29 @@ static void onInvalidFrameHandler(tup_frameError_t error, uintptr_t tag)
 
 static void onSynHandler(uint32_t j, size_t windowSize, uintptr_t tag)
 {
-    descriptor_t* descr_p = (descriptor_t*)tag;
+    descriptor_t* descr_p = (descriptor_t*)tag;    
 
     if (descr_p->isMaster)
     {
-        descr_p->partnerWindowSize = windowSize;
-        descr_p->receivedJ = j;
+        state_t oldState = state_master_waitSyn;
+        if (atomic_compare_exchange_strong(&descr_p->state, &oldState, state_master_waitSynAckSent))
+        {
+            descr_p->partnerWindowSize = windowSize;
+            descr_p->receivedJ = j;
 
-        tup_transfer_setResult(&descr_p->transfer, TUP_OK);
-        descr_p->state = state_master_waitSynAckSent;
+            tup_transfer_setResult(&descr_p->transfer, TUP_OK);
+        }
     }
     else
     {
-        descr_p->receivedJ = j;
-        descr_p->partnerWindowSize = windowSize;
+        state_t oldState = state_slave_waitSyn;
+        if (atomic_compare_exchange_strong(&descr_p->state, &oldState, state_slave_waitSynAckSent))
+        {
+            descr_p->partnerWindowSize = windowSize;
+            descr_p->receivedJ = j;
 
-        tup_transfer_setResult(&descr_p->transfer, TUP_OK);
-        descr_p->state = state_slave_waitSynAckSent;
+            tup_transfer_setResult(&descr_p->transfer, TUP_OK);
+        }
     }
 }
 
@@ -527,20 +551,34 @@ static void onFinHandler(uintptr_t tag)
 {
     descriptor_t* descr_p = (descriptor_t*)tag;
 
-    tup_transfer_setResult(&descr_p->transfer, TUP_OK);
-    descr_p->state = state_waitFinAckSent;
+    state_t oldState = state_ready;
+    if (!atomic_compare_exchange_strong(&descr_p->state, &oldState, state_waitFinAckSent))
+    {
+        return;
+    }
+
+    tup_transfer_setResult(&descr_p->transfer, TUP_OK);    
 }
 
-static void onDataHandler(const void volatile* payload_p, size_t payloadSize_bytes, bool isFinal, uintptr_t tag)
+static void onDataHandler(const void volatile* payload_p, size_t payloadSize_bytes, uint32_t j, bool isFinal, uintptr_t tag)
 {
     descriptor_t* descr_p = (descriptor_t*)tag;
 
-    descr_p->state = state_waitResult;
+    state_t oldState = state_ready;
+    if (!atomic_compare_exchange_strong(&descr_p->state, &oldState, state_waitResult))
+    {
+        return;
+    }
 
     if (descr_p->onReceiveData != NULL)
-    {
-        descr_p->onReceiveData(payload_p, payloadSize_bytes, isFinal, descr_p->userCallbackValue);
+    {        
+        if (j != descr_p->receivedJ)
+        {
+            descr_p->onReceiveData(payload_p, payloadSize_bytes, isFinal, descr_p->userCallbackValue);
+        }
     }
+
+    descr_p->receivedJ = j;
 }
 
 static void onFailHandler(tup_transfer_fail_t failCode, uintptr_t tag)
@@ -553,6 +591,15 @@ static void onFailHandler(tup_transfer_fail_t failCode, uintptr_t tag)
     if (descr_p->onFail != NULL)
     {
         descr_p->onFail(failCode, descr_p->userCallbackValue);
+    }
+}
+
+static void onRetryProgressHandler(uint32_t attemptNumber, uint32_t maxAttemptCount, uint32_t remainingTime_ms, uintptr_t tag)
+{
+    descriptor_t* descr_p = (descriptor_t*)tag;
+    if (descr_p->onRetryProgress != NULL)
+    {
+        descr_p->onRetryProgress(attemptNumber, maxAttemptCount, remainingTime_ms, descr_p->userCallbackValue);
     }
 }
 

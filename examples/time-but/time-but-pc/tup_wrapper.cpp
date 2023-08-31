@@ -31,6 +31,16 @@ public:
         _owner.doOnSendDataProgress(sentSize_bytes, totalSize_bytes);
     }
 
+    void doOnBadResponse(tup_transfer_result_t resultCode)
+    {
+        _owner.doOnBadResponse(resultCode);
+    }
+
+    void doOnRetryProgress(uint32_t attemptNumber, uint32_t maxAttemptCount, uint32_t remainingTime_ms)
+    {
+        _owner.doOnRetryProgress(attemptNumber, maxAttemptCount, remainingTime_ms);
+    }
+
     void doOnResultSent()
     {
         _owner.doOnResultSent();
@@ -107,6 +117,18 @@ static void onSendDataProgressHandler(size_t sentSize_bytes, size_t totalSize_by
 {
     auto& invoker = *reinterpret_cast<InstanceSignalsInvoker*>(callbackValue);
     invoker.doOnSendDataProgress(sentSize_bytes, totalSize_bytes);
+}
+
+static void onBadResponseHandler(tup_transfer_result_t resultCode, uintptr_t callbackValue)
+{
+    auto& invoker = *reinterpret_cast<InstanceSignalsInvoker*>(callbackValue);
+    invoker.doOnBadResponse(resultCode);
+}
+
+static void onRetryProgressHandler(uint32_t attemptNumber, uint32_t maxAttemptCount, uint32_t remainingTime_ms, uintptr_t callbackValue)
+{
+    auto& invoker = *reinterpret_cast<InstanceSignalsInvoker*>(callbackValue);
+    invoker.doOnRetryProgress(attemptNumber, maxAttemptCount, remainingTime_ms);
 }
 
 static void onResultSentHandler(uintptr_t callbackValue)
@@ -230,7 +252,7 @@ void TupWrapper::setName(const QString& value)
 
 static void tupPortLogHandler(const char* text)
 {
-    qDebug() << QString(text);
+    qDebug() << QString::number((uintptr_t)QThread::currentThreadId()) << ": " << QString(text);
 }
 
 bool TupWrapper::run()
@@ -253,6 +275,9 @@ bool TupWrapper::run()
     _initStruct.onReceiveData = onReceiveDataHandler;
     _initStruct.onSendDataProgress = onSendDataProgressHandler;
     _initStruct.onSendResult = onResultSentHandler;
+    _initStruct.onBadResponse = onBadResponseHandler;
+    _initStruct.onRetryProgress = onRetryProgressHandler;
+
 
     _initStruct.workBuffer_p = _workBuf.data();
     _initStruct.workBufferSize_bytes = _workBuf.size();
@@ -396,6 +421,16 @@ void TupWrapper::doOnDisconnectRequest()
 void TupWrapper::doOnSendDataProgress(quintptr sentSize_bytes, quintptr totalSize_bytes)
 {
     emit onSendDataProgress(sentSize_bytes, totalSize_bytes);
+}
+
+void TupWrapper::doOnBadResponse(tup_transfer_result_t resultCode)
+{
+    emit onBadResponse(resultCode);
+}
+
+void TupWrapper::doOnRetryProgress(quint32 attemptNumber, quint32 maxAttemptCount, quint32 remainingTime_ms)
+{
+    emit onRetryProgress(attemptNumber, maxAttemptCount, remainingTime_ms);
 }
 
 void TupWrapper::doOnResultSent()

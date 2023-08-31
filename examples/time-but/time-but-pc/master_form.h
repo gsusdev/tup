@@ -32,6 +32,7 @@ private slots:
     void slotOnConnect();
     void slotOnDisconnectRequest();
     void slotOnSendDataProgress(quintptr sentSize_bytes, quintptr totalSize_bytes);
+    void slotOnRetryProgress(quint32 attemptNumber, quint32 maxAttemptCount, quint32 remainingTime_ms);
     void slotOnResultSent();
     void slotOnReceiveData(QByteArray data, quint8 isFinal);
     void slotOnFail(quint32 failCode);

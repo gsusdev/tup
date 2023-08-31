@@ -6,6 +6,39 @@
   <Texts>
     <TextGroup Id="Group1" />
     <TextGroup Id="Unsorted">
+      <Text Id="__SingleUse_OHEY" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">:</Translation>
+      </Text>
+      <Text Id="__SingleUse_H8R8" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">:</Translation>
+      </Text>
+      <Text Id="__SingleUse_72LS" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">0</Translation>
+      </Text>
+      <Text Id="__SingleUse_3HAF" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">0</Translation>
+      </Text>
+      <Text Id="__SingleUse_VN3F" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">00:00:00</Translation>
+      </Text>
+      <Text Id="__SingleUse_FH35" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">0</Translation>
+      </Text>
+      <Text Id="__SingleUse_GD7R" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">0</Translation>
+      </Text>
+      <Text Id="__SingleUse_LPBN" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">0</Translation>
+      </Text>
+      <Text Id="__SingleUse_LCXY" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Not connected</Translation>
+      </Text>
+      <Text Id="status" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Not connected</Translation>
+      </Text>
+      <Text Id="__SingleUse_J1XH" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">&lt;status&gt;</Translation>
+      </Text>
       <Text Id="__SingleUse_SHS5" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">+</Translation>
       </Text>
@@ -25,19 +58,19 @@
         <Translation Language="GB">+</Translation>
       </Text>
       <Text Id="__SingleUse_ER24" Alignment="Left" TypographyId="Default">
-        <Translation Language="GB">False</Translation>
+        <Translation Language="GB">&lt;isDown&gt;</Translation>
       </Text>
       <Text Id="__SingleUse_JG56" Alignment="Left" TypographyId="Default">
         <Translation Language="GB">Down:</Translation>
       </Text>
       <Text Id="__SingleUse_JUNK" Alignment="Left" TypographyId="Default">
-        <Translation Language="GB">0</Translation>
+        <Translation Language="GB">&lt;clickCount&gt;</Translation>
       </Text>
       <Text Id="__SingleUse_9USB" Alignment="Left" TypographyId="Default">
         <Translation Language="GB">Clicks:</Translation>
       </Text>
       <Text Id="__SingleUse_KYIC" Alignment="Left" TypographyId="Default">
-        <Translation Language="GB">HH:MM:SS</Translation>
+        <Translation Language="GB">&lt;slaveTime&gt;</Translation>
       </Text>
       <Text Id="__SingleUse_SHYX" Alignment="Left" TypographyId="Default">
         <Translation Language="GB">Remote:</Translation>
@@ -46,13 +79,13 @@
         <Translation Language="GB">Update</Translation>
       </Text>
       <Text Id="__SingleUse_MPY6" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">H</Translation>
+        <Translation Language="GB">&lt;hours&gt;</Translation>
       </Text>
-      <Text Id="__SingleUse_U79U" Alignment="Left" TypographyId="Default">
-        <Translation Language="GB">S</Translation>
+      <Text Id="__SingleUse_U79U" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">&lt;seconds&gt;</Translation>
       </Text>
       <Text Id="__SingleUse_3DBF" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">M</Translation>
+        <Translation Language="GB">&lt;minutes&gt;</Translation>
       </Text>
       <Text Id="__SingleUse_YD3A" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">Connect</Translation>
@@ -60,7 +93,7 @@
     </TextGroup>
   </Texts>
   <Typographies>
-    <Typography Id="Default" Font="verdana.ttf" Size="20" Bpp="4" Direction="LTR" FallbackCharacter="?" />
+    <Typography Id="Default" Font="verdana.ttf" Size="20" Bpp="4" Direction="LTR" FallbackCharacter="?" WildcardCharacters="~!@#$%^&amp;*()_-=+/\|'&quot;&lt;&gt;[]" WildcardCharacterRanges="0-9,A-Z,a-z" />
     <Typography Id="Large" Font="verdana.ttf" Size="40" Bpp="4" Direction="LTR" FallbackCharacter="?" />
     <Typography Id="Small" Font="verdana.ttf" Size="10" Bpp="4" Direction="LTR" FallbackCharacter="?" />
   </Typographies>

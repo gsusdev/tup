@@ -23,7 +23,7 @@ SlaveForm::SlaveForm(QWidget *parent) :
     _tup.setIsMaster(false);
     _tup.setPort(&_port);
 
-    _master.setTup(&_tup);
+    _slave.setTup(&_tup);
 
     connect(ui->butAccept, &QPushButton::clicked, this, &SlaveForm::slotButAcceptClicked);
     connect(ui->butClear, &QPushButton::clicked, this, &SlaveForm::slotButClearClicked);
@@ -36,11 +36,17 @@ SlaveForm::SlaveForm(QWidget *parent) :
     connect(&_tup, &TupWrapper::onReceiveData, this, &SlaveForm::slotOnReceiveData);
     connect(&_tup, &TupWrapper::onFail, this, &SlaveForm::slotOnFail);
 
-    connect(&_master, &SlaveHandler::sigOnUpdated, this, &SlaveForm::slotOnReceivedFromMaster);
+    connect(&_slave, &SlaveHandler::sigOnUpdated, this, &SlaveForm::slotOnReceivedFromMaster);
+
+    connect(&_timer, &QTimer::timeout, this, &SlaveForm::slotTimerTimeout);
+
+    _timer.setInterval(1000);
+    _timer.start();
 }
 
 SlaveForm::~SlaveForm()
 {
+    _timer.stop();
     delete ui;
 }
 
@@ -66,6 +72,10 @@ void SlaveForm::slotButAcceptClicked(bool checked)
     if (!_tup.tupAccept())
     {
         qDebug() << "Slave failed to accept";
+    }
+    else
+    {
+        ui->butAccept->setEnabled(false);
     }
 }
 
@@ -113,24 +123,31 @@ void SlaveForm::slotOnReceiveData(QByteArray data, quint8 isFinal)
 void SlaveForm::slotOnFail(quint32 failCode)
 {
     ui->plainTextEdit->appendPlainText(QString("Fail %1").arg(failCode));
+    ui->butAccept->setEnabled(true);
 }
 
 void SlaveForm::slotOnReceivedFromMaster()
 {
-    const auto& masterOutput = _master.masterOutput();
+    const auto& masterOutput = _slave.masterOutput();
 
     ui->sbInHour->setValue(masterOutput.hour);
     ui->sbInMinute->setValue(masterOutput.minute);
     ui->sbInSecond->setValue(masterOutput.second);
 
-    if (ui->chkCopyToSend->isChecked())
+    auto isValid = true;
+
+    isValid &= masterOutput.hour < 24;
+    isValid &= masterOutput.minute < 60;
+    isValid &= masterOutput.second < 60;
+
+    if (ui->chkCopyToSend->isChecked() || (ui->chkSetIfValid->isChecked() && isValid))
     {
         ui->sbOutHour->setValue(masterOutput.hour);
         ui->sbOutMinute->setValue(masterOutput.minute);
         ui->sbOutSecond->setValue(masterOutput.second);
     }
 
-    auto& slaveOutput = _master.slaveOutput();
+    auto& slaveOutput = _slave.slaveOutput();
 
     slaveOutput.hour = ui->sbOutHour->value();
     slaveOutput.minute = ui->sbOutMinute->value();
@@ -149,4 +166,39 @@ void SlaveForm::slotOnReceivedFromMaster()
     slaveOutput.mcuIdSize = sizeof(mcuId);
 
     *reinterpret_cast<uint32_t*>(slaveOutput.mcuId) = mcuId;
+}
+
+void SlaveForm::slotTimerTimeout()
+{
+    if (!ui->chkTimeGo->isChecked())
+    {
+        return;
+    }
+
+    uint8_t hour = ui->sbOutHour->value();
+    uint8_t minute = ui->sbOutMinute->value();
+    uint8_t second = ui->sbOutSecond->value();
+
+    ++second;
+
+    if (second == 60)
+    {
+        second = 0;
+        ++minute;
+    }
+
+    if (minute == 60)
+    {
+        minute = 0;
+        ++hour;
+    }
+
+    if (hour == 24)
+    {
+        hour = 0;
+    }
+
+    ui->sbOutHour->setValue(hour);
+    ui->sbOutMinute->setValue(minute);
+    ui->sbOutSecond->setValue(second);
 }

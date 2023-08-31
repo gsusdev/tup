@@ -31,9 +31,10 @@ typedef void (*tup_transfer_onCompleted_t)(tup_transfer_result_t resultCode, uin
 typedef void (*tup_transfer_onInvalidFrame_t)(tup_frameError_t error, uintptr_t tag);
 typedef void (*tup_transfer_onSyn_t)(uint32_t j, size_t windowSize, uintptr_t tag);
 typedef void (*tup_transfer_onFin_t)(uintptr_t tag);
-typedef void (*tup_transfer_onData_t)(const void volatile* payload_p, size_t payloadSize_bytes, bool isFinal, uintptr_t tag);
+typedef void (*tup_transfer_onData_t)(const void volatile* payload_p, size_t payloadSize_bytes, uint32_t j, bool isFinal, uintptr_t tag);
 typedef void (*tup_transfer_onFail_t)(tup_transfer_fail_t failCode, uintptr_t tag);
 typedef void (*tup_transfer_onAckSent_t)(uintptr_t tag);
+typedef void (*tup_transfer_onRetryProgress_t)(uint32_t attemptNumber, uint32_t maxAttemptCount, uint32_t remainingPauseTime_ms, uintptr_t tag);
 
 typedef struct
 {	
@@ -52,6 +53,7 @@ typedef struct
     tup_transfer_onFail_t onFail;    
     tup_transfer_onInvalidFrame_t onInvalidFrame;
     tup_transfer_onAckSent_t onAckSent;
+    tup_transfer_onRetryProgress_t onRetryProgress;
     uintptr_t userCallbackValue;    
     uintptr_t txCallbackValue;
     uintptr_t signal;

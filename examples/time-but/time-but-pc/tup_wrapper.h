@@ -47,6 +47,8 @@ signals:
     void onConnect();
     void onDisconnectRequest();
     void onSendDataProgress(quintptr sentSize_bytes, quintptr totalSize_bytes);
+    void onBadResponse(qint32 resultCode);
+    void onRetryProgress(qint32 attemptNumber, qint32 maxAttemptCount, qint32 remainingTime_ms);
     void onResultSent();
     void onReceiveData(QByteArray data, quint8 isFinal);
     void onFail(quint32 failCode);
@@ -69,6 +71,8 @@ private:
     void doOnConnect();
     void doOnDisconnectRequest();
     void doOnSendDataProgress(quintptr sentSize_bytes, quintptr totalSize_bytes);
+    void doOnBadResponse(tup_transfer_result_t resultCode);
+    void doOnRetryProgress(quint32 attemptNumber, quint32 maxAttemptCount, quint32 remainingTime_ms);
     void doOnResultSent();
     void doOnReceiveData(QByteArray data, quint8 isFinal);
     void doOnFail(quint32 failCode);

@@ -5,10 +5,38 @@
         "Name": "MainScreen",
         "Components": [
           {
+            "Type": "TextArea",
+            "Name": "textArea5_1",
+            "X": 85,
+            "Y": 128,
+            "Width": 9,
+            "Height": 24,
+            "TextId": "__SingleUse_H8R8",
+            "TextRotation": "0",
+            "Color": {
+              "Green": 127
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea5_1_1",
+            "X": 145,
+            "Y": 128,
+            "Width": 9,
+            "Height": 24,
+            "TextId": "__SingleUse_OHEY",
+            "TextRotation": "0",
+            "Color": {
+              "Green": 127
+            },
+            "AutoSize": true
+          },
+          {
             "Type": "FlexButton",
             "Name": "butHourUp",
             "X": 30,
-            "Y": 56,
+            "Y": 86,
             "Width": 56,
             "Height": 33,
             "ButtonTrigger": {
@@ -60,7 +88,7 @@
             "Type": "FlexButton",
             "Name": "butHourDown",
             "X": 30,
-            "Y": 127,
+            "Y": 157,
             "Width": 56,
             "Height": 33,
             "ButtonTrigger": {
@@ -111,22 +139,26 @@
           {
             "Type": "TextArea",
             "Name": "labHour",
-            "X": 51,
-            "Y": 98,
-            "Width": 15,
+            "X": 30,
+            "Y": 128,
+            "Width": 55,
             "Height": 24,
             "TextId": "__SingleUse_MPY6",
             "TextRotation": "0",
             "Color": {
               "Green": 127
             },
-            "AutoSize": true
+            "Wildcard1": {
+              "TextId": "__SingleUse_LPBN",
+              "UseBuffer": true,
+              "BufferSize": 4
+            }
           },
           {
             "Type": "FlexButton",
             "Name": "butMinuteDown",
             "X": 92,
-            "Y": 127,
+            "Y": 157,
             "Width": 56,
             "Height": 33,
             "ButtonTrigger": {
@@ -178,7 +210,7 @@
             "Type": "FlexButton",
             "Name": "butMinuteUp",
             "X": 92,
-            "Y": 56,
+            "Y": 86,
             "Width": 56,
             "Height": 33,
             "ButtonTrigger": {
@@ -229,16 +261,20 @@
           {
             "Type": "TextArea",
             "Name": "labSecond",
-            "X": 173,
-            "Y": 98,
-            "Width": 14,
+            "X": 152,
+            "Y": 128,
+            "Width": 56,
             "Height": 24,
             "TextId": "__SingleUse_U79U",
             "TextRotation": "0",
             "Color": {
               "Green": 127
             },
-            "AutoSize": true
+            "Wildcard1": {
+              "TextId": "__SingleUse_FH35",
+              "UseBuffer": true,
+              "BufferSize": 4
+            }
           },
           {
             "Type": "ButtonWithLabel",
@@ -264,22 +300,26 @@
           {
             "Type": "TextArea",
             "Name": "labMinute",
-            "X": 112,
-            "Y": 98,
-            "Width": 17,
+            "X": 92,
+            "Y": 128,
+            "Width": 56,
             "Height": 24,
             "TextId": "__SingleUse_3DBF",
             "TextRotation": "0",
             "Color": {
               "Green": 127
             },
-            "AutoSize": true
+            "Wildcard1": {
+              "TextId": "__SingleUse_GD7R",
+              "UseBuffer": true,
+              "BufferSize": 4
+            }
           },
           {
             "Type": "FlexButton",
             "Name": "butSecondUp",
             "X": 152,
-            "Y": 56,
+            "Y": 86,
             "Width": 56,
             "Height": 33,
             "ButtonTrigger": {
@@ -331,7 +371,7 @@
             "Type": "FlexButton",
             "Name": "butSecondDown",
             "X": 152,
-            "Y": 127,
+            "Y": 157,
             "Width": 56,
             "Height": 33,
             "ButtonTrigger": {
@@ -382,8 +422,8 @@
           {
             "Type": "ToggleButton",
             "Name": "butUpdate",
-            "X": 112,
-            "Y": 171,
+            "X": 116,
+            "Y": 196,
             "Width": 110,
             "Height": 50,
             "Pressed": "__generated\\alternate_theme_images_widgets_togglebutton_medium_rounded_off_light.png",
@@ -393,8 +433,8 @@
           {
             "Type": "TextArea",
             "Name": "textArea1",
-            "X": 30,
-            "Y": 184,
+            "X": 31,
+            "Y": 209,
             "Width": 71,
             "Height": 24,
             "TextId": "__SingleUse_Q7NT",
@@ -408,7 +448,7 @@
             "Type": "TextArea",
             "Name": "textArea2",
             "X": 30,
-            "Y": 236,
+            "Y": 248,
             "Width": 86,
             "Height": 24,
             "TextId": "__SingleUse_SHYX",
@@ -422,21 +462,25 @@
             "Type": "TextArea",
             "Name": "labRemoteTime",
             "X": 127,
-            "Y": 236,
-            "Width": 110,
+            "Y": 248,
+            "Width": 106,
             "Height": 24,
             "TextId": "__SingleUse_KYIC",
             "TextRotation": "0",
             "Color": {
               "Red": 255
             },
-            "AutoSize": true
+            "Wildcard1": {
+              "TextId": "__SingleUse_VN3F",
+              "UseBuffer": true,
+              "BufferSize": 16
+            }
           },
           {
             "Type": "TextArea",
             "Name": "textArea3",
             "X": 30,
-            "Y": 261,
+            "Y": 272,
             "Width": 65,
             "Height": 24,
             "TextId": "__SingleUse_9USB",
@@ -450,21 +494,25 @@
             "Type": "TextArea",
             "Name": "labClicks",
             "X": 127,
-            "Y": 261,
-            "Width": 13,
+            "Y": 272,
+            "Width": 106,
             "Height": 24,
             "TextId": "__SingleUse_JUNK",
             "TextRotation": "0",
             "Color": {
               "Red": 255
             },
-            "AutoSize": true
+            "Wildcard1": {
+              "TextId": "__SingleUse_3HAF",
+              "UseBuffer": true,
+              "BufferSize": 16
+            }
           },
           {
             "Type": "TextArea",
             "Name": "textArea4",
             "X": 30,
-            "Y": 285,
+            "Y": 296,
             "Width": 65,
             "Height": 24,
             "TextId": "__SingleUse_JG56",
@@ -478,15 +526,36 @@
             "Type": "TextArea",
             "Name": "labButDown",
             "X": 127,
-            "Y": 285,
-            "Width": 50,
+            "Y": 296,
+            "Width": 106,
             "Height": 24,
             "TextId": "__SingleUse_ER24",
             "TextRotation": "0",
             "Color": {
               "Red": 255
             },
-            "AutoSize": true
+            "Wildcard1": {
+              "TextId": "__SingleUse_72LS",
+              "UseBuffer": true,
+              "BufferSize": 16
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "labStatus",
+            "Y": 50,
+            "Width": 237,
+            "Height": 23,
+            "TextId": "__SingleUse_J1XH",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_LCXY",
+              "UseBuffer": true,
+              "BufferSize": 32
+            }
           }
         ],
         "Interactions": [

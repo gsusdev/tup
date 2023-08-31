@@ -61,6 +61,7 @@ typedef struct descriptor_t
     uint32_t retryCount;
     uint32_t retryPause_ms;
     uint32_t flushDuration_ms;
+    uint32_t lastRetryProressRemainingTime_ms;
     tup_transfer_onSyn_t onSyn;
     tup_transfer_onFin_t onFin;
     tup_transfer_onData_t onData;
@@ -68,6 +69,7 @@ typedef struct descriptor_t
     tup_transfer_onFail_t onFail;
     tup_transfer_onInvalidFrame_t onInvalidFrame;
     tup_transfer_onAckSent_t onAckSent;
+    tup_transfer_onRetryProgress_t onRetryProgress;
     uintptr_t userCallbackValue;
     uintptr_t txCallbackValue;
     tup_frameSender_t frameSender;
@@ -118,6 +120,8 @@ static bool receivedBadFrame(descriptor_t* descr_p, tup_frameError_t error);
 static void invokeHandlingFunc(descriptor_t* descr_p);
 static bool waitForSignal(descriptor_t* descr_p, uint32_t timeout_ms);
 
+static void doOnRetryProgress(const descriptor_t* descr_p, uint32_t maxAttemptCount, uint32_t remaining_ms);
+
 static void _log(const descriptor_t* descr_p, const char* text, tup_log_severity_t severity);
 
 #define INFO(text) _log(descr_p, text, tup_log_info)
@@ -162,6 +166,7 @@ tup_transfer_error_t tup_transfer_init(tup_transfer_t* descriptor_p, const tup_t
     descr_p->onFail = init_p->onFail;
     descr_p->onAckSent = init_p->onAckSent;
     descr_p->onInvalidFrame = init_p->onInvalidFrame;
+    descr_p->onRetryProgress = init_p->onRetryProgress;
     descr_p->userCallbackValue = init_p->userCallbackValue;
     descr_p->txCallbackValue = init_p->txCallbackValue;
     descr_p->rxError = false;
@@ -200,7 +205,8 @@ tup_transfer_error_t tup_transfer_reset(tup_transfer_t* descriptor_p)
     descr_p->state = state_idle;
 
     const tup_frameReceiver_error_t receiverErr = tup_frameReceiver_reset(&descr_p->frameReceiver);
-    if (receiverErr != tup_frameReceiver_error_ok)
+    const tup_frameSender_error_t senderErr = tup_frameSender_reset(&descr_p->frameSender);
+    if ((receiverErr != tup_frameReceiver_error_ok) || ((senderErr != tup_frameSender_error_ok)))
     {
         return tup_transfer_error_internal;
     }
@@ -242,8 +248,9 @@ tup_transfer_error_t tup_transfer_sendSyn(tup_transfer_t* descriptor_p, uint32_t
     const tup_body_error_t bodyErr = tup_v1_syn_encode(&frame, descr_p->bodyBuffer_p, descr_p->bodyBufferSize_bytes, &descr_p->lastSend.bodyFullSize);
     if (bodyErr == tup_body_error_ok)
     {
-        DEBUG("SendSyn: send()");
+        DEBUG("SendSyn");        
         ok = send(descr_p, frame.j, frame.cop, false, descr_p->bodyBuffer_p, descr_p->lastSend.bodyFullSize);
+        doOnRetryProgress(descr_p, descr_p->retryCount, 0);
     }
 
     if (!ok)
@@ -278,8 +285,9 @@ tup_transfer_error_t tup_transfer_sendFin(tup_transfer_t* descriptor_p)
     const tup_body_error_t bodyErr = tup_v1_fin_encode(&frame, descr_p->bodyBuffer_p, descr_p->bodyBufferSize_bytes, &descr_p->lastSend.bodyFullSize);
     if (bodyErr == tup_body_error_ok)
     {
-        DEBUG("SendFin: send()");
+        DEBUG("SendFin");        
         ok = send(descr_p, frame.j, frame.cop, false, descr_p->bodyBuffer_p, descr_p->lastSend.bodyFullSize);
+        doOnRetryProgress(descr_p, descr_p->retryCount, 0);
     }
 
     if (!ok)
@@ -342,8 +350,9 @@ tup_transfer_error_t tup_transfer_sendData(tup_transfer_t* descriptor_p, const v
     const tup_body_error_t bodyErr = tup_v1_data_encode(&frame, descr_p->bodyBuffer_p, descr_p->bodyBufferSize_bytes, &descr_p->lastSend.bodyFullSize);
     if (bodyErr == tup_body_error_ok)
     {
-        DEBUG("SendData: send()");
+        DEBUG("SendData");        
         ok = send(descr_p, frame.j, frame.cop, false, descr_p->bodyBuffer_p, descr_p->lastSend.bodyFullSize);
+        doOnRetryProgress(descr_p, descr_p->retryCount, 0);
     }
 
     if (!ok)
@@ -375,13 +384,13 @@ tup_transfer_error_t tup_transfer_setResult(tup_transfer_t* descriptor_p, tup_tr
     const tup_body_error_t bodyErr = tup_v1_ack_encode(&frame, descr_p->bodyBuffer_p, descr_p->bodyBufferSize_bytes, &descr_p->lastSend.bodyFullSize);
     if (bodyErr == tup_body_error_ok)
     {
-        DEBUG("setResult: send()");
+        DEBUG("setResult");
         descr_p->ackSending = true;
-        ok = send(descr_p, frame.j, frame.cop, false, descr_p->bodyBuffer_p, descr_p->lastSend.bodyFullSize);
+        ok = send(descr_p, frame.j, frame.cop, false, descr_p->bodyBuffer_p, descr_p->lastSend.bodyFullSize);        
     }
 
     descr_p->state = state_idle;
-    DEBUG("frameReceiver_listen()");
+    DEBUG("setResult: listen");
     const tup_frameReceiver_error_t err = tup_frameReceiver_listen(&descr_p->frameReceiver);
     if (err != tup_frameReceiver_error_ok)
     {
@@ -465,7 +474,7 @@ tup_transfer_error_t tup_transfer_run(tup_transfer_t* descriptor_p)
             break;
         }
 
-        waitForSignal(descr_p, 10);
+        waitForSignal(descr_p, 50);
         tup_transfer_handle(descriptor_p);
     }
 
@@ -644,7 +653,7 @@ static bool receivedData(descriptor_t* descr_p, const volatile void* body_p, siz
 
     descr_p->state = state_waitResult;
     descr_p->lastReceivedJ = data.j;
-    descr_p->onData(data.payload_p, data.payloadSize_bytes, data.end, descr_p->userCallbackValue);
+    descr_p->onData(data.payload_p, data.payloadSize_bytes, data.j, data.end, descr_p->userCallbackValue);
 
     return true;
 }
@@ -801,14 +810,29 @@ static tup_transfer_error_t handleWaitAck(descriptor_t* descr_p)
                             descr_p->rxError = false;
                             descr_p->state = state_idle;
 
-                            //tup_frameReceiver_reset(&descr_p->frameReceiver);
                             const tup_frameReceiver_error_t recvErr = tup_frameReceiver_listen(&descr_p->frameReceiver);
                             if (recvErr != tup_frameReceiver_error_ok)
                             {
                                 return tup_transfer_error_internal;
                             }
 
-                            descr_p->onCompleted(ack.error, descr_p->userCallbackValue);                            
+                            if (ack.error == TUP_ERROR_CRC32)
+                            {
+                                const bool ok = send(descr_p, descr_p->lastSend.j, descr_p->lastSend.cop, true, descr_p->bodyBuffer_p, descr_p->lastSend.bodyFullSize);
+                                if (ok)
+                                {
+                                    descr_p->state = state_waitAck;
+                                    doOnRetryProgress(descr_p, descr_p->retryCount, 0);
+                                }
+                                else
+                                {
+                                    ERROR("handleWaitAck: send failed");
+                                }
+                            }
+                            else
+                            {
+                                descr_p->onCompleted(ack.error, descr_p->userCallbackValue);
+                            }
                         }
                         else
                         {
@@ -895,8 +919,9 @@ static tup_transfer_error_t handleWaitRetry(descriptor_t* descr_p)
     {
         const bool ok = send(descr_p, descr_p->lastSend.j, descr_p->lastSend.cop, true, descr_p->bodyBuffer_p, descr_p->lastSend.bodyFullSize);
         if (ok)
-        {
+        {            
             descr_p->state = state_waitAck;
+            doOnRetryProgress(descr_p, descr_p->retryCount, 0);
         }
         else
         {
@@ -909,6 +934,22 @@ static tup_transfer_error_t handleWaitRetry(descriptor_t* descr_p)
             {
                 descr_p->lastSend.time_ms = curTime_ms;
             }
+        }
+    }
+    else
+    {
+        const uint32_t remainingTime_ms = descr_p->retryPause_ms - elapsed_ms;
+
+        uint32_t dif = UINT32_MAX;
+        if (remainingTime_ms < descr_p->lastRetryProressRemainingTime_ms)
+        {
+            dif = descr_p->lastRetryProressRemainingTime_ms - remainingTime_ms;
+        }
+
+        if (dif > 1000u)
+        {
+            descr_p->lastRetryProressRemainingTime_ms = remainingTime_ms;
+            doOnRetryProgress(descr_p, descr_p->retryCount, remainingTime_ms);
         }
     }
 
@@ -933,6 +974,7 @@ static tup_transfer_error_t handleWaitFlush(descriptor_t* descr_p)
         if (ok)
         {
             descr_p->state = state_waitAck;
+            doOnRetryProgress(descr_p, descr_p->retryCount, 0);
         }
         else
         {
@@ -966,6 +1008,14 @@ static tup_transfer_error_t handleWaitResult(descriptor_t* descr_p)
     (void)descr_p;
 
     return tup_transfer_error_ok;
+}
+
+static void doOnRetryProgress(const descriptor_t* descr_p, uint32_t maxAttemptCount, uint32_t remaining_ms)
+{
+    if (descr_p->onRetryProgress != NULL)
+    {
+        descr_p->onRetryProgress(descr_p->lastSend.attemptCount, maxAttemptCount, remaining_ms, descr_p->userCallbackValue);
+    }
 }
 
 static void invokeHandlingFunc(descriptor_t* descr_p)

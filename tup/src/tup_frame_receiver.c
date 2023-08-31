@@ -101,6 +101,7 @@ tup_frameReceiver_error_t tup_frameReceiver_listen(tup_frameReceiver_t* descript
         status = tup_frameReceiver_status_idle;
         if (!atomic_compare_exchange_strong(&descr_p->status, &status, tup_frameReceiver_status_receiving))
         {
+        	tup_exitCritical(tmp);
             return tup_frameReceiver_error_invalidOperation;
         }
 

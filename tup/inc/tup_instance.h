@@ -10,6 +10,8 @@
 typedef void (*tup_onConnect_t)(uintptr_t callbackValue);
 typedef void (*tup_onDisconnectRequest_t)(uintptr_t callbackValue);
 typedef void (*tup_onSendDataProgress_t)(size_t sentSize_bytes, size_t totalSize_bytes, uintptr_t callbackValue);
+typedef void (*tup_onRetryProgress_t)(uint32_t attemptNumber, uint32_t maxAttemptCount, uint32_t remainingPauseTime_ms, uintptr_t callbackValue);
+typedef void (*tup_onBadResponse_t)(tup_transfer_result_t resultCode, uintptr_t callbackValue);
 typedef void (*tup_onSendResult_t)(uintptr_t callbackValue);
 typedef void (*tup_onReceiveData_t)(const void volatile* buf_p, size_t size_bytes, bool isFinal, uintptr_t callbackValue);
 typedef void (*tup_onFail_t)(tup_transfer_fail_t failCode, uintptr_t callbackValue);
@@ -37,6 +39,8 @@ typedef struct tup_initStruct_t
     tup_onConnect_t onConnect;
     tup_onDisconnectRequest_t onDisconnectRequest;
     tup_onSendDataProgress_t onSendDataProgress;
+    tup_onRetryProgress_t onRetryProgress;
+    tup_onBadResponse_t onBadResponse;
     tup_onSendResult_t onSendResult;
     tup_onReceiveData_t onReceiveData;
     tup_onFail_t onFail;
@@ -47,7 +51,7 @@ typedef struct tup_initStruct_t
     const char* name;
 } tup_initStruct_t;
 
-PDESCR(tup_instance_t, 320, 8);
+PDESCR(tup_instance_t, 324, 8);
 
 #if defined(__cplusplus)
 extern "C" {

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdbool>
+#include <atomic>
+
 #include <QObject>
 #include <QByteArray>
 
@@ -13,6 +16,7 @@ public:
     explicit MasterHandler(QObject *parent = nullptr);
 
     void setTup(TupWrapper* tup_p);
+    bool isBusy() const { return _isBusy; }
 
     const app_protocol_slaveOutputData_t& slaveOutput() const { return _slaveOutput; }
 
@@ -21,6 +25,7 @@ public:
     void setMasterOutput(const app_protocol_masterOutputData_t& values) { _masterOutput = values; }
 
     void sendData();
+    void reset();
 
 signals:
     void sigOnUpdated();
@@ -28,12 +33,16 @@ signals:
 
 private slots:
     void onReceiveData(QByteArray data, quint8 isFinal);
+    void onResultSent();
 
 private:
     TupWrapper* _tup_p = nullptr;
 
     app_protocol_masterOutputData_t _masterOutput;
     app_protocol_slaveOutputData_t _slaveOutput;
+
+    bool _isDataReceived = false;
+    std::atomic_bool _isBusy;
 
     QByteArray _inputBuf;
 };

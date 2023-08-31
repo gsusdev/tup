@@ -14,13 +14,13 @@ TUPlib
 * *examples* - демонстрационные проекты;
 	- *time-but* - проект-решение домашнего задания:
 		* *time-but-slave* - проект slave-устройства для STM32F4-DISCOVERY;
-		* *time-but-master* - проект master-устройства для STM32F429I-DISCO (не завершён);
+		* *time-but-master* - проект master-устройства для STM32F429I-DISCO;
 		* *time-but-pc* - проект пользовательского интерфейса для ПК;
 * *TupTool* - утилита для отладки библиотеки.
 
 Прямые пути к ключевым текстам:
- - [библиотека, исходники](/tup/src), [библиотека, заголовочные](/tup/inc);
- - [slave-устройство](/examples/time-but/time-but-slave/Core/App));
- - [master-устройство (не доделано)](/examples/time-but/time-but-master/Core/time-but);
+ - [библиотека - исходники](/tup/src), [библиотека - заголовочные](/tup/inc);
+ - [slave-устройство](/examples/time-but/time-but-slave/Core/App);
+ - [master-устройство](/examples/time-but/time-but-master/Core/time-but);
  - [интерфейсная утилита для time-but](/examples/time-but/time-but-pc);
  - [отладочная утилита для TUP](/TupTool).

@@ -8,8 +8,9 @@
 #include <mvp/View.hpp>
 #include <gui/mainscreen_screen/MainScreenPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
-#include <touchgfx/containers/buttons/Buttons.hpp>
 #include <touchgfx/widgets/TextArea.hpp>
+#include <touchgfx/containers/buttons/Buttons.hpp>
+#include <touchgfx/widgets/TextAreaWithWildcard.hpp>
 #include <touchgfx/widgets/ButtonWithLabel.hpp>
 #include <touchgfx/widgets/ToggleButton.hpp>
 
@@ -65,24 +66,45 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
+    touchgfx::TextArea textArea5_1;
+    touchgfx::TextArea textArea5_1_1;
     touchgfx::TextButtonStyle< touchgfx::BoxWithBorderButtonStyle< touchgfx::ClickButtonTrigger >  >  butHourUp;
     touchgfx::TextButtonStyle< touchgfx::BoxWithBorderButtonStyle< touchgfx::ClickButtonTrigger >  >  butHourDown;
-    touchgfx::TextArea labHour;
+    touchgfx::TextAreaWithOneWildcard labHour;
     touchgfx::TextButtonStyle< touchgfx::BoxWithBorderButtonStyle< touchgfx::ClickButtonTrigger >  >  butMinuteDown;
     touchgfx::TextButtonStyle< touchgfx::BoxWithBorderButtonStyle< touchgfx::ClickButtonTrigger >  >  butMinuteUp;
-    touchgfx::TextArea labSecond;
+    touchgfx::TextAreaWithOneWildcard labSecond;
     touchgfx::ButtonWithLabel butConnect;
-    touchgfx::TextArea labMinute;
+    touchgfx::TextAreaWithOneWildcard labMinute;
     touchgfx::TextButtonStyle< touchgfx::BoxWithBorderButtonStyle< touchgfx::ClickButtonTrigger >  >  butSecondUp;
     touchgfx::TextButtonStyle< touchgfx::BoxWithBorderButtonStyle< touchgfx::ClickButtonTrigger >  >  butSecondDown;
     touchgfx::ToggleButton butUpdate;
     touchgfx::TextArea textArea1;
     touchgfx::TextArea textArea2;
-    touchgfx::TextArea labRemoteTime;
+    touchgfx::TextAreaWithOneWildcard labRemoteTime;
     touchgfx::TextArea textArea3;
-    touchgfx::TextArea labClicks;
+    touchgfx::TextAreaWithOneWildcard labClicks;
     touchgfx::TextArea textArea4;
-    touchgfx::TextArea labButDown;
+    touchgfx::TextAreaWithOneWildcard labButDown;
+    touchgfx::TextAreaWithOneWildcard labStatus;
+
+    /*
+     * Wildcard Buffers
+     */
+    static const uint16_t LABHOUR_SIZE = 4;
+    touchgfx::Unicode::UnicodeChar labHourBuffer[LABHOUR_SIZE];
+    static const uint16_t LABSECOND_SIZE = 4;
+    touchgfx::Unicode::UnicodeChar labSecondBuffer[LABSECOND_SIZE];
+    static const uint16_t LABMINUTE_SIZE = 4;
+    touchgfx::Unicode::UnicodeChar labMinuteBuffer[LABMINUTE_SIZE];
+    static const uint16_t LABREMOTETIME_SIZE = 16;
+    touchgfx::Unicode::UnicodeChar labRemoteTimeBuffer[LABREMOTETIME_SIZE];
+    static const uint16_t LABCLICKS_SIZE = 16;
+    touchgfx::Unicode::UnicodeChar labClicksBuffer[LABCLICKS_SIZE];
+    static const uint16_t LABBUTDOWN_SIZE = 16;
+    touchgfx::Unicode::UnicodeChar labButDownBuffer[LABBUTDOWN_SIZE];
+    static const uint16_t LABSTATUS_SIZE = 32;
+    touchgfx::Unicode::UnicodeChar labStatusBuffer[LABSTATUS_SIZE];
 
 private:
 

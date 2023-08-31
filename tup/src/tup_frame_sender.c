@@ -52,6 +52,18 @@ tup_frameSender_error_t tup_frameSender_init(tup_frameSender_t* descriptor_p, co
     return tup_frameSender_error_ok;
 }
 
+tup_frameSender_error_t tup_frameSender_reset(tup_frameSender_t* descriptor_p)
+{
+	DESCR(descriptor_p);
+
+	descr_p->sendPos = 0;
+	descr_p->fullBodySize_bytes = 0;
+	descr_p->sendingBody_p = NULL;
+	descr_p->status = tup_frameSender_status_idle;
+
+	return true;
+}
+
 tup_frameSender_error_t tup_frameSender_send(tup_frameSender_t* descriptor_p, tup_version_t version, const void* body_p, size_t fullBodySize_bytes)
 {
     DESCR(descriptor_p);

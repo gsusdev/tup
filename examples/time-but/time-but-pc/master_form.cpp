@@ -1,6 +1,8 @@
 #include "master_form.h"
 #include "ui_master_form.h"
 
+#include <cmath>
+
 #include <QDebug>
 #include <QTime>
 #include <QtEndian>
@@ -33,6 +35,7 @@ MasterForm::MasterForm(QWidget *parent) :
     connect(&_tup, &TupWrapper::onConnect, this, &MasterForm::slotOnConnect);
     connect(&_tup, &TupWrapper::onDisconnectRequest, this, &MasterForm::slotOnDisconnectRequest);
     connect(&_tup, &TupWrapper::onSendDataProgress, this, &MasterForm::slotOnSendDataProgress);
+    connect(&_tup, &TupWrapper::onRetryProgress, this, &MasterForm::slotOnRetryProgress);
     connect(&_tup, &TupWrapper::onResultSent, this, &MasterForm::slotOnResultSent);
     connect(&_tup, &TupWrapper::onReceiveData, this, &MasterForm::slotOnReceiveData);
     connect(&_tup, &TupWrapper::onFail, this, &MasterForm::slotOnFail);
@@ -70,15 +73,25 @@ void MasterForm::slotButConnectClicked(bool checked)
 {
     (void)checked;
 
+    ui->plainTextEdit->appendPlainText("Connecting");
     if (!_tup.tupConnect())
     {
-        qDebug() << "Master failed to connect";
+        ui->plainTextEdit->appendPlainText("Fail");
+    }
+    else
+    {
+        ui->butConnect->setEnabled(false);        
     }
 }
 
 void MasterForm::slotButSendClicked(bool checked)
 {
     (void)checked;
+
+    if (!_tup.isConnected() || _master.isBusy())
+    {
+        return;
+    }
 
     auto& masterOutput = _master.masterOutput();    
 
@@ -103,6 +116,7 @@ void MasterForm::slotButSendClicked(bool checked)
         masterOutput.second = 60;
     }
 
+    ui->plainTextEdit->appendPlainText("Sending");
     _master.sendData();
 }
 
@@ -129,6 +143,8 @@ void MasterForm::slotButClearClicked(bool checked)
 
 void MasterForm::slotOnConnect()
 {
+    _master.reset();
+
     ui->butSend->setEnabled(true);
     ui->chkAutoSend->setEnabled(true);
 
@@ -145,6 +161,21 @@ void MasterForm::slotOnSendDataProgress(quintptr sentSize_bytes, quintptr totalS
     ui->plainTextEdit->appendPlainText(QString("Sent %1 of %2 bytes").arg(sentSize_bytes).arg(totalSize_bytes));
 }
 
+void MasterForm::slotOnRetryProgress(quint32 attemptNumber, quint32 maxAttemptCount, quint32 remainingTime_ms)
+{
+    if (remainingTime_ms == 0)
+    {
+        if (attemptNumber > 1)
+        {
+            ui->plainTextEdit->appendPlainText(QString("Attempt %1 of %2").arg(attemptNumber).arg(maxAttemptCount));
+        }
+    }
+    else
+    {
+        ui->plainTextEdit->appendPlainText(QString("Retry in %1 sec").arg(std::ceil(remainingTime_ms / 1000.0)));
+    }
+}
+
 void MasterForm::slotOnResultSent()
 {
     ui->plainTextEdit->appendPlainText("ACK sent");
@@ -159,6 +190,12 @@ void MasterForm::slotOnReceiveData(QByteArray data, quint8 isFinal)
 void MasterForm::slotOnFail(quint32 failCode)
 {
     ui->plainTextEdit->appendPlainText(QString("Fail %1").arg(failCode));
+    ui->butConnect->setEnabled(true);
+    if (ui->chkAutoSend->isChecked())
+    {
+        ui->chkAutoSend->setChecked(false);
+        slotChkAutoClicked(false);
+    }
 }
 
 void MasterForm::slotOnReceivedFromSlave()

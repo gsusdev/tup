@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QSerialPort>
+#include <QTimer>
 
 #include "tup_wrapper.h"
 #include "slave_handler.h"
@@ -36,12 +37,16 @@ private slots:
 
     void slotOnReceivedFromMaster();
 
+    void slotTimerTimeout();
+
 private:
     Ui::SlaveForm *ui;
 
     QSerialPort _port;
     TupWrapper _tup;
-    SlaveHandler _master;
+    SlaveHandler _slave;
+
+    QTimer _timer;
 };
 
 #endif // SLAVE_FORM_H

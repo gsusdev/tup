@@ -194,7 +194,7 @@
        <item row="2" column="1">
         <widget class="QSpinBox" name="sbAutoSendInterval">
          <property name="minimum">
-          <number>20</number>
+          <number>1</number>
          </property>
          <property name="maximum">
           <number>10000</number>
@@ -326,7 +326,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

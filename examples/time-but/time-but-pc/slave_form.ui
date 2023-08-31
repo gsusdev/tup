@@ -15,14 +15,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_4">
-    <item row="0" column="0">
-     <widget class="QGroupBox" name="gbPort">
-      <property name="title">
-       <string>Port</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout"/>
-     </widget>
-    </item>
     <item row="1" column="0">
      <widget class="QGroupBox" name="groupBox">
       <property name="title">
@@ -48,22 +40,15 @@
        <string>Send</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0">
-        <widget class="QCheckBox" name="chkIsBigEndian">
-         <property name="text">
-          <string>Big Endian</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_7">
-         <property name="text">
-          <string>Click counter</string>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="1">
         <widget class="QSpinBox" name="sbClickCount">
+         <property name="maximum">
+          <number>255</number>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QSpinBox" name="sbOutHour">
          <property name="maximum">
           <number>255</number>
          </property>
@@ -76,10 +61,10 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
-        <widget class="QSpinBox" name="sbOutHour">
-         <property name="maximum">
-          <number>255</number>
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="chkIsBigEndian">
+         <property name="text">
+          <string>Big Endian</string>
          </property>
         </widget>
        </item>
@@ -87,41 +72,6 @@
         <widget class="QLabel" name="label_6">
          <property name="text">
           <string>Minute</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QSpinBox" name="sbOutMinute">
-         <property name="maximum">
-          <number>255</number>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Second</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QSpinBox" name="sbOutSecond">
-         <property name="maximum">
-          <number>255</number>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="label_8">
-         <property name="text">
-          <string>ID</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
-        <widget class="QLineEdit" name="leMcuId">
-         <property name="readOnly">
-          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -138,7 +88,64 @@
          </property>
         </widget>
        </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Second</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QLineEdit" name="leMcuId">
+         <property name="readOnly">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QSpinBox" name="sbOutSecond">
+         <property name="maximum">
+          <number>255</number>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>Click counter</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>ID</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QSpinBox" name="sbOutMinute">
+         <property name="maximum">
+          <number>255</number>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QCheckBox" name="chkTimeGo">
+         <property name="text">
+          <string>Go</string>
+         </property>
+        </widget>
+       </item>
       </layout>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QGroupBox" name="gbPort">
+      <property name="title">
+       <string>Port</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout"/>
      </widget>
     </item>
     <item row="2" column="0">
@@ -205,6 +212,13 @@
          </property>
         </widget>
        </item>
+       <item row="3" column="1">
+        <widget class="QCheckBox" name="chkSetIfValid">
+         <property name="text">
+          <string>Set if valid</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -260,7 +274,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

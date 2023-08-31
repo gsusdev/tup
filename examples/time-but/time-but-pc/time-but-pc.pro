@@ -16,6 +16,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ../../../tup/src/tup_body.c \
+    ../../../tup/src/tup_bufReader.c \
+    ../../../tup/src/tup_bufWriter.c \
+    ../../../tup/src/tup_crc32.c \
+    ../../../tup/src/tup_endianness.c \
+    ../../../tup/src/tup_frame_receiver.c \
+    ../../../tup/src/tup_frame_sender.c \
+    ../../../tup/src/tup_header.c \
+    ../../../tup/src/tup_instance.c \
+    ../../../tup/src/tup_platform.c \
+    ../../../tup/src/tup_v1_body.c \
+    ../../../tup/src/tup_v1_transfer.c \
     ../common/app_protocol.c \
     main.cpp \
     mainwindow.cpp \
@@ -27,6 +39,18 @@ SOURCES += \
     tup_wrapper.cpp
 
 HEADERS += \
+    ../../../tup/src/tup_body.h \
+    ../../../tup/src/tup_bufReader.h \
+    ../../../tup/src/tup_bufWriter.h \
+    ../../../tup/src/tup_crc32.h \
+    ../../../tup/src/tup_endianness.h \
+    ../../../tup/src/tup_frame_receiver.h \
+    ../../../tup/src/tup_frame_sender.h \
+    ../../../tup/src/tup_header.h \
+    ../../../tup/src/tup_platform.h \
+    ../../../tup/src/tup_types.h \
+    ../../../tup/src/tup_v1_body.h \
+    ../../../tup/src/tup_v1_transfer.h \
     ../common/app_protocol.h \
     mainwindow.h \
     master_form.h \
@@ -46,13 +70,13 @@ INCLUDEPATH += \
     ../../../tup/inc \
     ../common
 
-win32 {
-    !contains(QMAKE_TARGET.arch, x86_64) {
-        Debug:LIBS += -L../../../tup/lib -ltup_win_x86_debug
-        Release:LIBS += -L../../../tup/lib -ltup_win_x86_release
-
-    } else {
-        Debug:LIBS += -L../../../tup/lib -ltup_win_x64_debug
-        Release:LIBS += -L../../../tup/lib -ltup_win_x64_debug
-    }
-}
+#win32 {
+#    !contains(QMAKE_TARGET.arch, x86_64) {
+#        Debug:LIBS += -L../../../tup/lib -ltup_win_x86_debug
+#        Release:LIBS += -L../../../tup/lib -ltup_win_x86_release
+#
+#    } else {
+#        Debug:LIBS += -L../../../tup/lib -ltup_win_x64_debug
+#        Release:LIBS += -L../../../tup/lib -ltup_win_x64_debug
+#    }
+#}

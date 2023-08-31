@@ -14,6 +14,18 @@ MainScreenViewBase::MainScreenViewBase() :
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
 
+    textArea5_1.setXY(85, 128);
+    textArea5_1.setColor(touchgfx::Color::getColorFromRGB(0, 127, 0));
+    textArea5_1.setLinespacing(0);
+    textArea5_1.setTypedText(touchgfx::TypedText(T___SINGLEUSE_H8R8));
+    add(textArea5_1);
+
+    textArea5_1_1.setXY(145, 128);
+    textArea5_1_1.setColor(touchgfx::Color::getColorFromRGB(0, 127, 0));
+    textArea5_1_1.setLinespacing(0);
+    textArea5_1_1.setTypedText(touchgfx::TypedText(T___SINGLEUSE_OHEY));
+    add(textArea5_1_1);
+
     butHourUp.setBoxWithBorderPosition(0, 0, 56, 33);
     butHourUp.setBorderSize(5);
     butHourUp.setBoxWithBorderColors(touchgfx::Color::getColorFromRGB(0, 102, 153), touchgfx::Color::getColorFromRGB(0, 153, 204), touchgfx::Color::getColorFromRGB(0, 51, 102), touchgfx::Color::getColorFromRGB(51, 102, 153));
@@ -21,7 +33,7 @@ MainScreenViewBase::MainScreenViewBase() :
     butHourUp.setTextPosition(0, 0, 56, 33);
     butHourUp.setTextColors(touchgfx::Color::getColorFromRGB(255, 255, 255), touchgfx::Color::getColorFromRGB(184, 184, 184));
     butHourUp.setAction(flexButtonCallback);
-    butHourUp.setPosition(30, 56, 56, 33);
+    butHourUp.setPosition(30, 86, 56, 33);
     add(butHourUp);
 
     butHourDown.setBoxWithBorderPosition(0, 0, 56, 33);
@@ -31,12 +43,14 @@ MainScreenViewBase::MainScreenViewBase() :
     butHourDown.setTextPosition(0, 0, 56, 33);
     butHourDown.setTextColors(touchgfx::Color::getColorFromRGB(255, 255, 255), touchgfx::Color::getColorFromRGB(184, 184, 184));
     butHourDown.setAction(flexButtonCallback);
-    butHourDown.setPosition(30, 127, 56, 33);
+    butHourDown.setPosition(30, 157, 56, 33);
     add(butHourDown);
 
-    labHour.setXY(51, 98);
+    labHour.setPosition(30, 128, 55, 24);
     labHour.setColor(touchgfx::Color::getColorFromRGB(0, 127, 0));
     labHour.setLinespacing(0);
+    Unicode::snprintf(labHourBuffer, LABHOUR_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_LPBN).getText());
+    labHour.setWildcard(labHourBuffer);
     labHour.setTypedText(touchgfx::TypedText(T___SINGLEUSE_MPY6));
     add(labHour);
 
@@ -47,7 +61,7 @@ MainScreenViewBase::MainScreenViewBase() :
     butMinuteDown.setTextPosition(0, 0, 56, 33);
     butMinuteDown.setTextColors(touchgfx::Color::getColorFromRGB(255, 255, 255), touchgfx::Color::getColorFromRGB(184, 184, 184));
     butMinuteDown.setAction(flexButtonCallback);
-    butMinuteDown.setPosition(92, 127, 56, 33);
+    butMinuteDown.setPosition(92, 157, 56, 33);
     add(butMinuteDown);
 
     butMinuteUp.setBoxWithBorderPosition(0, 0, 56, 33);
@@ -57,12 +71,14 @@ MainScreenViewBase::MainScreenViewBase() :
     butMinuteUp.setTextPosition(0, 0, 56, 33);
     butMinuteUp.setTextColors(touchgfx::Color::getColorFromRGB(255, 255, 255), touchgfx::Color::getColorFromRGB(184, 184, 184));
     butMinuteUp.setAction(flexButtonCallback);
-    butMinuteUp.setPosition(92, 56, 56, 33);
+    butMinuteUp.setPosition(92, 86, 56, 33);
     add(butMinuteUp);
 
-    labSecond.setXY(173, 98);
+    labSecond.setPosition(152, 128, 56, 24);
     labSecond.setColor(touchgfx::Color::getColorFromRGB(0, 127, 0));
     labSecond.setLinespacing(0);
+    Unicode::snprintf(labSecondBuffer, LABSECOND_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_FH35).getText());
+    labSecond.setWildcard(labSecondBuffer);
     labSecond.setTypedText(touchgfx::TypedText(T___SINGLEUSE_U79U));
     add(labSecond);
 
@@ -74,9 +90,11 @@ MainScreenViewBase::MainScreenViewBase() :
     butConnect.setAction(buttonCallback);
     add(butConnect);
 
-    labMinute.setXY(112, 98);
+    labMinute.setPosition(92, 128, 56, 24);
     labMinute.setColor(touchgfx::Color::getColorFromRGB(0, 127, 0));
     labMinute.setLinespacing(0);
+    Unicode::snprintf(labMinuteBuffer, LABMINUTE_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_GD7R).getText());
+    labMinute.setWildcard(labMinuteBuffer);
     labMinute.setTypedText(touchgfx::TypedText(T___SINGLEUSE_3DBF));
     add(labMinute);
 
@@ -87,7 +105,7 @@ MainScreenViewBase::MainScreenViewBase() :
     butSecondUp.setTextPosition(0, 0, 56, 33);
     butSecondUp.setTextColors(touchgfx::Color::getColorFromRGB(255, 255, 255), touchgfx::Color::getColorFromRGB(184, 184, 184));
     butSecondUp.setAction(flexButtonCallback);
-    butSecondUp.setPosition(152, 56, 56, 33);
+    butSecondUp.setPosition(152, 86, 56, 33);
     add(butSecondUp);
 
     butSecondDown.setBoxWithBorderPosition(0, 0, 56, 33);
@@ -97,55 +115,69 @@ MainScreenViewBase::MainScreenViewBase() :
     butSecondDown.setTextPosition(0, 0, 56, 33);
     butSecondDown.setTextColors(touchgfx::Color::getColorFromRGB(255, 255, 255), touchgfx::Color::getColorFromRGB(184, 184, 184));
     butSecondDown.setAction(flexButtonCallback);
-    butSecondDown.setPosition(152, 127, 56, 33);
+    butSecondDown.setPosition(152, 157, 56, 33);
     add(butSecondDown);
 
-    butUpdate.setXY(112, 171);
+    butUpdate.setXY(116, 196);
     butUpdate.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_TOGGLEBUTTON_MEDIUM_ROUNDED_ON_NORMAL_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_TOGGLEBUTTON_MEDIUM_ROUNDED_OFF_LIGHT_ID));
     butUpdate.setAction(buttonCallback);
     add(butUpdate);
 
-    textArea1.setXY(30, 184);
+    textArea1.setXY(31, 209);
     textArea1.setColor(touchgfx::Color::getColorFromRGB(0, 127, 0));
     textArea1.setLinespacing(0);
     textArea1.setTypedText(touchgfx::TypedText(T___SINGLEUSE_Q7NT));
     add(textArea1);
 
-    textArea2.setXY(30, 236);
+    textArea2.setXY(30, 248);
     textArea2.setColor(touchgfx::Color::getColorFromRGB(0, 127, 0));
     textArea2.setLinespacing(0);
     textArea2.setTypedText(touchgfx::TypedText(T___SINGLEUSE_SHYX));
     add(textArea2);
 
-    labRemoteTime.setXY(127, 236);
+    labRemoteTime.setPosition(127, 248, 106, 24);
     labRemoteTime.setColor(touchgfx::Color::getColorFromRGB(255, 0, 0));
     labRemoteTime.setLinespacing(0);
+    Unicode::snprintf(labRemoteTimeBuffer, LABREMOTETIME_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_VN3F).getText());
+    labRemoteTime.setWildcard(labRemoteTimeBuffer);
     labRemoteTime.setTypedText(touchgfx::TypedText(T___SINGLEUSE_KYIC));
     add(labRemoteTime);
 
-    textArea3.setXY(30, 261);
+    textArea3.setXY(30, 272);
     textArea3.setColor(touchgfx::Color::getColorFromRGB(0, 127, 0));
     textArea3.setLinespacing(0);
     textArea3.setTypedText(touchgfx::TypedText(T___SINGLEUSE_9USB));
     add(textArea3);
 
-    labClicks.setXY(127, 261);
+    labClicks.setPosition(127, 272, 106, 24);
     labClicks.setColor(touchgfx::Color::getColorFromRGB(255, 0, 0));
     labClicks.setLinespacing(0);
+    Unicode::snprintf(labClicksBuffer, LABCLICKS_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_3HAF).getText());
+    labClicks.setWildcard(labClicksBuffer);
     labClicks.setTypedText(touchgfx::TypedText(T___SINGLEUSE_JUNK));
     add(labClicks);
 
-    textArea4.setXY(30, 285);
+    textArea4.setXY(30, 296);
     textArea4.setColor(touchgfx::Color::getColorFromRGB(0, 127, 0));
     textArea4.setLinespacing(0);
     textArea4.setTypedText(touchgfx::TypedText(T___SINGLEUSE_JG56));
     add(textArea4);
 
-    labButDown.setXY(127, 285);
+    labButDown.setPosition(127, 296, 106, 24);
     labButDown.setColor(touchgfx::Color::getColorFromRGB(255, 0, 0));
     labButDown.setLinespacing(0);
+    Unicode::snprintf(labButDownBuffer, LABBUTDOWN_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_72LS).getText());
+    labButDown.setWildcard(labButDownBuffer);
     labButDown.setTypedText(touchgfx::TypedText(T___SINGLEUSE_ER24));
     add(labButDown);
+
+    labStatus.setPosition(0, 50, 237, 23);
+    labStatus.setColor(touchgfx::Color::getColorFromRGB(255, 0, 0));
+    labStatus.setLinespacing(0);
+    Unicode::snprintf(labStatusBuffer, LABSTATUS_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_LCXY).getText());
+    labStatus.setWildcard(labStatusBuffer);
+    labStatus.setTypedText(touchgfx::TypedText(T___SINGLEUSE_J1XH));
+    add(labStatus);
 }
 
 MainScreenViewBase::~MainScreenViewBase()
