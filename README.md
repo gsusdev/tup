@@ -24,3 +24,5 @@ TUPlib
  - [master-устройство](/examples/time-but/time-but-master/Core/time-but);
  - [интерфейсная утилита для time-but](/examples/time-but/time-but-pc);
  - [отладочная утилита для TUP](/TupTool).
+
+Демонстрационное [видео](https://youtu.be/gyw5UKWxKCU) с платами DISCOVERY.
